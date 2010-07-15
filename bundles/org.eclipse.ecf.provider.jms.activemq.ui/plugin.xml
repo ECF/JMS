@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<plugin>
+
+   <extension
+         point="org.eclipse.ui.actionSets">
+      <actionSet
+            id="org.eclipse.ecf.provider.jms.activemq.ui.actionSet"
+            label="Communications - ActiveMQ"
+            visible="false">
+         <action
+               class="org.eclipse.ecf.internal.provider.jms.activemq.ui.wizard.JoinGroupWizardAction"
+               icon="icons/collaboration.gif"
+               id="org.eclipse.ecf.provider.jms.activemq.action2"
+               label="Connect Workspace to JMS (ActiveMQ) Group..."
+               style="push"
+               toolbarPath="org.eclipse.ecf.ui.collaboration"
+               tooltip="Connect Workspace to JMS (ActiveMQ) Group">
+         </action>
+      </actionSet>
+   </extension>
+
+</plugin>

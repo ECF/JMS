@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: ECF ActiveMQ Provider UI
+Bundle-SymbolicName: org.eclipse.ecf.provider.jms.activemq.ui;singleton:=true
+Bundle-Version: 1.3.0.qualifier
+Bundle-Activator: org.eclipse.ecf.internal.provider.jms.activemq.ui.Activator
+Bundle-Vendor: Eclipse.org
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.core.resources,
+ org.eclipse.ecf.ui,
+ org.eclipse.ecf,
+ org.eclipse.ecf.example.collab
+Eclipse-LazyStart: true
+Bundle-ActivationPolicy: lazy
+Bundle-RequiredExecutionEnvironment: J2SE-1.4

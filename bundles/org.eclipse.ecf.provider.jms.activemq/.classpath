@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5"/>
+	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry exported="true" kind="lib" path="lib/activemq5.2.0/activeio-core-3.1.0.jar" sourcepath="lib/activemq5.2.0/activemq-core-5.2.0.zip"/>
+	<classpathentry exported="true" kind="lib" path="lib/activemq5.2.0/activemq-core-5.2.0.jar" sourcepath="lib/activemq5.2.0/activemq-core-5.2.0.zip"/>
+	<classpathentry exported="true" kind="lib" path="lib/activemq5.2.0/commons-logging-1.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/activemq5.2.0/geronimo-j2ee-management_1.0_spec-1.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/activemq5.2.0/geronimo-jta_1.0.1B_spec-1.0.1.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

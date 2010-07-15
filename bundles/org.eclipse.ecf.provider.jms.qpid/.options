@@ -1,0 +1,16 @@
+# Debugging options for the org.eclipse.ecf.provider.jms.qpid plug-in
+
+# Turn on general debugging for the org.eclipse.ecf.provider.jms.qpid plug-in
+org.eclipse.ecf.provider.jms.qpid/debug=true
+org.eclipse.ecf.provider.jms.qpid/debug/filter = *
+org.eclipse.ecf.provider.jms.qpid/debug/flag = true
+
+# Trace when exceptions are caught
+org.eclipse.ecf.provider.jms.qpid/debug/exceptions/catching=false
+# Trace when exceptions are thrown
+org.eclipse.ecf.provider.jms.qpid/debug/exceptions/throwing=false
+
+# Trace when methods are entered
+org.eclipse.ecf.provider.jms.qpid/debug/methods/entering=false
+# Trace when methods are exited
+org.eclipse.ecf.provider.jms.qpid/debug/methods/exiting=false

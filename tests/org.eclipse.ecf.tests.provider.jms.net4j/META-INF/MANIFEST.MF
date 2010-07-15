@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: ECF Net4j Provider Tests
+Bundle-SymbolicName: org.eclipse.ecf.tests.provider.jms.net4j
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: org.eclipse.ecf.provider.jms.net4j.Activator
+Bundle-Vendor: Eclipse.org
+Require-Bundle: org.eclipse.core.runtime,
+ org.junit,
+ org.eclipse.ecf,
+ org.eclipse.ecf.datashare,
+ org.eclipse.ecf.remoteservice,
+ org.eclipse.ecf.tests,
+ org.eclipse.ecf.tests.provider.jms
+Eclipse-LazyStart: true
