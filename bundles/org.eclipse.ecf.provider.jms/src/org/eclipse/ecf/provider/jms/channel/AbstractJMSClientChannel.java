@@ -9,9 +9,11 @@
 package org.eclipse.ecf.provider.jms.channel;
 
 import java.io.*;
+import javax.jms.Message;
 import javax.jms.ObjectMessage;
 import org.eclipse.ecf.core.ContainerConnectException;
 import org.eclipse.ecf.core.identity.ID;
+import org.eclipse.ecf.core.sharedobject.util.SimpleFIFOQueue;
 import org.eclipse.ecf.core.util.ECFException;
 import org.eclipse.ecf.core.util.Trace;
 import org.eclipse.ecf.internal.provider.jms.*;
@@ -26,6 +28,9 @@ public abstract class AbstractJMSClientChannel extends AbstractJMSChannel implem
 	private static final int DEFAULT_DISCONNECT_WAIT_TIME = 3000;
 
 	private final int disconnectWaitTime = DEFAULT_DISCONNECT_WAIT_TIME;
+
+	private Object connectCompleteLock = new Object();
+	private SimpleFIFOQueue connectCompleteQueue = new SimpleFIFOQueue();
 
 	public AbstractJMSClientChannel(ISynchAsynchEventHandler handler, int keepAlive) {
 		super(handler, keepAlive);
@@ -70,6 +75,36 @@ public abstract class AbstractJMSClientChannel extends AbstractJMSChannel implem
 			fireListenersConnect(new ConnectionEvent(this, resultData));
 			Trace.exiting(Activator.PLUGIN_ID, JmsDebugOptions.METHODS_EXITING, this.getClass(), "connect", resultData); //$NON-NLS-1$
 			return resultData;
+		}
+	}
+
+	class TopicMessage {
+		Message msg;
+		JMSMessage jmsmsg;
+
+		public TopicMessage(Message msg, JMSMessage jmsmsg) {
+			this.msg = msg;
+			this.jmsmsg = jmsmsg;
+		}
+	}
+
+	public void start() {
+		synchronized (connectCompleteLock) {
+			super.start();
+			while (!connectCompleteQueue.isEmpty()) {
+				TopicMessage tm = (TopicMessage) connectCompleteQueue.dequeue();
+				if (tm != null)
+					super.handleTopicMessage(tm.msg, tm.jmsmsg);
+			}
+		}
+	}
+
+	protected void handleTopicMessage(Message msg, JMSMessage jmsmsg) {
+		synchronized (connectCompleteLock) {
+			if (!isStarted())
+				connectCompleteQueue.enqueue(new TopicMessage(msg, jmsmsg));
+			else
+				super.handleTopicMessage(msg, jmsmsg);
 		}
 	}
 

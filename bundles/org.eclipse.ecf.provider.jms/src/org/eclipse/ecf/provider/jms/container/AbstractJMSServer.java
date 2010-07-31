@@ -14,6 +14,7 @@ package org.eclipse.ecf.provider.jms.container;
 import java.io.*;
 import java.net.ConnectException;
 import java.net.SocketAddress;
+import javax.jms.ObjectMessage;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.ecf.core.ContainerConnectException;
@@ -80,9 +81,14 @@ public abstract class AbstractJMSServer extends ServerSOContainer {
 	 * @throws IOException not thrown by this implementation.
 	 */
 	protected Serializable processSynch(SynchEvent e) throws IOException {
-		final Object req = e.getData();
+		final Object[] data = ((Object[]) e.getData());
+		if (data == null)
+			return null;
+		// See AbstractJMSServerChannel, line 222
+		ObjectMessage omsg = (ObjectMessage) data[0];
+		ECFMessage req = (ECFMessage) data[1];
 		if (req instanceof ConnectRequestMessage) {
-			return handleConnectRequest((ConnectRequestMessage) req, (AbstractJMSServerChannel) e.getConnection());
+			return handleConnectRequest(omsg, (ConnectRequestMessage) req, (AbstractJMSServerChannel) e.getConnection());
 		} else if (req instanceof DisconnectRequestMessage) {
 			// disconnect them
 			final DisconnectRequestMessage dcm = (DisconnectRequestMessage) req;
@@ -110,7 +116,7 @@ public abstract class AbstractJMSServer extends ServerSOContainer {
 		return null;
 	}
 
-	protected Serializable handleConnectRequest(ConnectRequestMessage request, AbstractJMSServerChannel channel) {
+	protected Serializable handleConnectRequest(ObjectMessage omsg, ConnectRequestMessage request, AbstractJMSServerChannel channel) {
 		Trace.entering(Activator.PLUGIN_ID, JmsDebugOptions.METHODS_ENTERING, this.getClass(), "handleConnectRequest", new Object[] { //$NON-NLS-1$
 				request, channel});
 		try {
@@ -123,40 +129,38 @@ public abstract class AbstractJMSServer extends ServerSOContainer {
 			final ContainerMessage.JoinGroupMessage jgm = (ContainerMessage.JoinGroupMessage) containerMessage.getData();
 			if (jgm == null)
 				throw new InvalidObjectException(Messages.AbstractJMSServer_CONNECT_EXCEPTION_JOINGROUPMESSAGE_NOT_NULL);
-			ID memberIDs[] = null;
-			final Serializable[] messages = new Serializable[2];
-			AbstractJMSServerChannel.Client newclient = null;
 			synchronized (getGroupMembershipLock()) {
 				if (isClosing)
 					throw new ContainerConnectException(Messages.AbstractJMSServer_CONNECT_EXCEPTION_CONTAINER_CLOSING);
 				// Now check to see if this request is going to be allowed
 				checkJoin(channel, remoteID, request.getTargetJMSID().getTopicOrQueueName(), jgm.getData());
 
-				newclient = channel.new Client(remoteID);
+				AbstractJMSServerChannel.Client newclient = channel.createClient(remoteID);
+
+				ID localID = getID();
 
 				if (addNewRemoteMember(remoteID, newclient)) {
 					// Get current membership
-					memberIDs = getGroupMemberIDs();
+					ID[] memberIDs = getGroupMemberIDs();
+					final Serializable[] messages = new Serializable[2];
+					messages[0] = serialize(ContainerMessage.createViewChangeMessage(localID, remoteID, getNextSequenceNumber(), memberIDs, true, null));
 					// Notify existing remotes about new member
-					messages[1] = serialize(ContainerMessage.createViewChangeMessage(getID(), null, getNextSequenceNumber(), new ID[] {remoteID}, true, null));
-				} else {
-					final ConnectException e = new ConnectException(Messages.AbstractJMSServer_CONNECT_EXCEPTION_REFUSED);
-					throw e;
-				}
+					messages[1] = serialize(ContainerMessage.createViewChangeMessage(localID, null, getNextSequenceNumber(), new ID[] {remoteID}, true, null));
+
+					newclient.sendConnectResponse(omsg.getJMSCorrelationID(), request.getTargetID(), request.getSenderID(), messages);
+
+				} else
+					throw new ConnectException(Messages.AbstractJMSServer_CONNECT_EXCEPTION_REFUSED);
+
 			}
 			// notify listeners
 			fireContainerEvent(new ContainerConnectedEvent(this.getID(), remoteID));
-
-			messages[0] = serialize(ContainerMessage.createViewChangeMessage(getID(), remoteID, getNextSequenceNumber(), memberIDs, true, null));
-
-			newclient.start();
-
-			return messages;
-
+			Trace.exiting(Activator.PLUGIN_ID, JmsDebugOptions.METHODS_EXITING, this.getClass(), "handleConnectRequest"); //$NON-NLS-1$
 		} catch (final Exception e) {
 			traceAndLogExceptionCatch(IStatus.ERROR, "handleConnectRequest", e); //$NON-NLS-1$
-			return null;
 		}
+		return null;
+
 	}
 
 	/**

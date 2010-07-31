@@ -33,27 +33,16 @@ public abstract class AbstractJMSChannel extends SocketAddress implements ISynch
 	private static final long serialVersionUID = 4516462369458730752L;
 
 	private static long correlationID = 0;
-
 	protected Connection connection = null;
-
 	protected Session session = null;
-
 	protected JmsTopic jmsTopic = null;
-
 	protected ID localContainerID;
-
 	protected boolean connected = false;
-
 	private boolean started = false;
-
 	protected ISynchAsynchEventHandler handler;
-
 	protected int keepAlive = -1;
-
 	private Map properties = new HashMap();
-
 	protected List connectionListeners = new ArrayList();
-
 	protected boolean isStopping = false;
 
 	public AbstractJMSChannel(ISynchAsynchEventHandler hand, int keepAlive) {
@@ -182,12 +171,13 @@ public abstract class AbstractJMSChannel extends SocketAddress implements ISynch
 			return connectData;
 		} catch (Exception e) {
 			disconnect();
+			Trace.entering(Activator.PLUGIN_ID, JmsDebugOptions.EXCEPTIONS_THROWING, this.getClass(), "setupJMS"); //$NON-NLS-1$
 			throw new ECFException("JMS Connect or Setup Exception", e); //$NON-NLS-1$
 		}
 	}
 
 	public void sendAsynch(ID recipient, Object obj) throws IOException {
-		queueObject(recipient, (Serializable) obj);
+		sendAsync(recipient, (Serializable) obj);
 	}
 
 	/*
@@ -197,17 +187,19 @@ public abstract class AbstractJMSChannel extends SocketAddress implements ISynch
 	 *      byte[])
 	 */
 	public void sendAsynch(ID recipient, byte[] obj) throws IOException {
-		queueObject(recipient, obj);
+		sendAsync(recipient, obj);
 	}
 
-	private void queueObject(ID recipient, Serializable obj) throws IOException {
+	private void sendAsync(ID recipient, Serializable obj) throws IOException {
+		Trace.entering(Activator.PLUGIN_ID, JmsDebugOptions.METHODS_ENTERING, this.getClass(), "sendAsynch", new Object[] {recipient, obj}); //$NON-NLS-1$
 		if (!isActive())
 			throw new ConnectException("Not connected"); //$NON-NLS-1$
 		try {
-			jmsTopic.getProducer().send(session.createObjectMessage(new JMSMessage(getConnectionID(), getLocalID(), recipient, obj)));
+			jmsTopic.getProducer().send(createObjectMessage(new JMSMessage(getConnectionID(), getLocalID(), recipient, obj)));
 		} catch (JMSException e) {
-			throwIOException("queueObject", "Exception in queueObject", e); //$NON-NLS-1$ //$NON-NLS-2$
+			throwIOException("sendAsynch", "Exception in sendAsynch", e); //$NON-NLS-1$ //$NON-NLS-2$
 		}
+		Trace.exiting(Activator.PLUGIN_ID, JmsDebugOptions.METHODS_EXITING, this.getClass(), "sendAsynch"); //$NON-NLS-1$
 	}
 
 	protected void onTopicException(JMSException except) {
@@ -298,6 +290,7 @@ public abstract class AbstractJMSChannel extends SocketAddress implements ISynch
 		}
 		fireListenersDisconnect(new ConnectionEvent(this, null));
 		connectionListeners.clear();
+		Trace.entering(Activator.PLUGIN_ID, JmsDebugOptions.METHODS_EXITING, this.getClass(), "disconnect"); //$NON-NLS-1$
 	}
 
 	/*
@@ -323,13 +316,13 @@ public abstract class AbstractJMSChannel extends SocketAddress implements ISynch
 				jmsmsg});
 		if (isActive()) {
 			try {
-				Object o = jmsmsg.getData();
-				handler.handleAsynchEvent(new AsynchEvent(this, o));
+				handler.handleAsynchEvent(new AsynchEvent(this, jmsmsg.getData()));
 			} catch (IOException e) {
 				Trace.catching(Activator.PLUGIN_ID, JmsDebugOptions.EXCEPTIONS_CATCHING, this.getClass(), "handleTopicMessage", e); //$NON-NLS-1$
 				Activator.getDefault().log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, IStatus.ERROR, "Exception on handleTopicMessage", e)); //$NON-NLS-1$
 			}
-		}
+		} else
+			Trace.trace(Activator.PLUGIN_ID, NLS.bind("handleTopicMessage: channel not active...ignoring message {0} with JMSMessage {1}", msg, jmsmsg)); //$NON-NLS-1$
 		Trace.exiting(Activator.PLUGIN_ID, JmsDebugOptions.METHODS_EXITING, this.getClass(), "handleTopicMessage"); //$NON-NLS-1$
 	}
 
@@ -345,12 +338,16 @@ public abstract class AbstractJMSChannel extends SocketAddress implements ISynch
 		return sendAndWait(obj, keepAlive);
 	}
 
+	protected ObjectMessage createObjectMessage(Serializable obj) throws JMSException {
+		return session.createObjectMessage(obj);
+	}
+
 	protected Serializable sendAndWait(Serializable obj, int waitDuration) throws IOException {
 		Trace.entering(Activator.PLUGIN_ID, JmsDebugOptions.METHODS_ENTERING, this.getClass(), "sendAndWait", new Object[] {obj, //$NON-NLS-1$
 				new Integer(waitDuration)});
 		synchronized (synch) {
 			try {
-				ObjectMessage msg = session.createObjectMessage(obj);
+				ObjectMessage msg = createObjectMessage(obj);
 				correlation = String.valueOf(getNextCorrelationID());
 				msg.setJMSCorrelationID(correlation);
 				waitDone = false;
@@ -420,21 +417,24 @@ public abstract class AbstractJMSChannel extends SocketAddress implements ISynch
 
 		public void onMessage(Message msg) {
 			try {
+				// All messages should be ObjectMessages
 				if (msg instanceof ObjectMessage) {
 					ObjectMessage omg = (ObjectMessage) msg;
 					Object o = omg.getObject();
+					// All messages should also be ECFMessages
 					if (o instanceof ECFMessage) {
 						ECFMessage ecfmsg = (ECFMessage) o;
 						ID fromID = ecfmsg.getSenderID();
 						if (fromID == null) {
-							Trace.exiting(Activator.PLUGIN_ID, JmsDebugOptions.METHODS_ENTERING, this.getClass(), "onMessage.fromID=null"); //$NON-NLS-1$
+							Trace.exiting(Activator.PLUGIN_ID, JmsDebugOptions.METHODS_ENTERING, this.getClass(), NLS.bind("onMessage: fromID=null...ignoring ECFMessage {0}", ecfmsg)); //$NON-NLS-1$
 							return;
 						}
 						if (fromID.equals(getLocalID())) {
-							Trace.exiting(Activator.PLUGIN_ID, JmsDebugOptions.METHODS_ENTERING, this.getClass(), "onMessage.fromID=localID IGNORING"); //$NON-NLS-1$
+							Trace.exiting(Activator.PLUGIN_ID, JmsDebugOptions.METHODS_ENTERING, this.getClass(), NLS.bind("onMessage:  fromID=localID...ignoring ECFMessage {0}", ecfmsg)); //$NON-NLS-1$
 							return;
 						}
-
+						// Get targetID...it's either null, and the message is intended for everyone, or it's 
+						// non-null and it equals our ID and is meant for us.  Anything else and it's not meant for us
 						ID targetID = ecfmsg.getTargetID();
 						if (targetID == null) {
 							if (ecfmsg instanceof JMSMessage)
@@ -452,16 +452,18 @@ public abstract class AbstractJMSChannel extends SocketAddress implements ISynch
 								else
 									Trace.trace(Activator.PLUGIN_ID, NLS.bind("onMessage.msg invalid message to {0}" //$NON-NLS-1$
 											, targetID));
-							}
+							} else
+								Trace.trace(Activator.PLUGIN_ID, NLS.bind("onMessage.msg ECFMessage {0} not intended for {1}" //$NON-NLS-1$
+										, ecfmsg, targetID));
 						}
 					} else
 						// received bogus message...ignore
-						Trace.trace(Activator.PLUGIN_ID, NLS.bind("onMessage received non-ECFMessage...ignoring {0}" //$NON-NLS-1$
+						Trace.trace(Activator.PLUGIN_ID, NLS.bind("onMessage: received non-ECFMessage...ignoring {0}" //$NON-NLS-1$
 								, o));
 				} else
-					Trace.trace(Activator.PLUGIN_ID, NLS.bind("onMessage.non object message received {0}", msg)); //$NON-NLS-1$
+					Trace.trace(Activator.PLUGIN_ID, NLS.bind("onMessage: received non-object message...ignoring {0}", msg)); //$NON-NLS-1$
 			} catch (Exception e) {
-				traceAndLogExceptionCatch(IStatus.ERROR, "JMSChannel onMessage Exception", e); //$NON-NLS-1$
+				traceAndLogExceptionCatch(IStatus.ERROR, "onMessage: Unexpected Exception", e); //$NON-NLS-1$
 			}
 		}
 	}

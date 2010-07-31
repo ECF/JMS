@@ -11,6 +11,7 @@ package org.eclipse.ecf.provider.jms.channel;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
+import javax.jms.JMSException;
 import javax.jms.ObjectMessage;
 import org.eclipse.ecf.core.identity.ID;
 import org.eclipse.ecf.core.util.ECFException;
@@ -18,6 +19,7 @@ import org.eclipse.ecf.core.util.Trace;
 import org.eclipse.ecf.internal.provider.jms.*;
 import org.eclipse.ecf.provider.comm.*;
 import org.eclipse.ecf.provider.jms.identity.JMSID;
+import org.eclipse.osgi.util.NLS;
 
 /**
  * Abstract JMS server channel.
@@ -207,22 +209,36 @@ public abstract class AbstractJMSServerChannel extends AbstractJMSChannel implem
 				Client.this.notifyAll();
 			}
 		}
+
+		public void sendConnectResponse(String jmsCorrelationID, ID targetID, ID senderID, Serializable[] messages) throws JMSException {
+			final ObjectMessage first = createObjectMessage(new ConnectResponseMessage(getConnectionID(), targetID, senderID, (messages == null) ? null : messages[0]));
+			first.setJMSCorrelationID(jmsCorrelationID);
+			jmsTopic.getProducer().send(first);
+			final ObjectMessage second = createObjectMessage(new JMSMessage(getConnectionID(), getLocalID(), null, (messages == null) ? null : messages[1]));
+			jmsTopic.getProducer().send(second);
+		}
+	}
+
+	public Client createClient(ID remoteID) {
+		Client newclient = new Client(remoteID);
+		newclient.start();
+		return newclient;
 	}
 
 	protected void handleSynchRequest(ObjectMessage omsg, ECFMessage o) {
 		Trace.entering(Activator.PLUGIN_ID, JmsDebugOptions.METHODS_ENTERING, this.getClass(), "respondToRequest", new Object[] {omsg, o}); //$NON-NLS-1$
 		try {
-			final Serializable[] resp = (Serializable[]) handler.handleSynchEvent(new SynchEvent(this, o));
+			final Serializable[] resp = (Serializable[]) handler.handleSynchEvent(new SynchEvent(this, new Object[] {omsg, o}));
 			// this resp is an Serializable[] with two messages, one for the
 			// connect response and the other for everyone else
 			if (o instanceof ConnectRequestMessage) {
-				final ObjectMessage first = session.createObjectMessage(new ConnectResponseMessage(getConnectionID(), o.getTargetID(), o.getSenderID(), (resp == null) ? null : resp[0]));
+				final ObjectMessage first = createObjectMessage(new ConnectResponseMessage(getConnectionID(), o.getTargetID(), o.getSenderID(), (resp == null) ? null : resp[0]));
 				first.setJMSCorrelationID(omsg.getJMSCorrelationID());
 				jmsTopic.getProducer().send(first);
-				final ObjectMessage second = session.createObjectMessage(new JMSMessage(getConnectionID(), getLocalID(), null, (resp == null) ? null : resp[1]));
+				final ObjectMessage second = createObjectMessage(new JMSMessage(getConnectionID(), getLocalID(), null, (resp == null) ? null : resp[1]));
 				jmsTopic.getProducer().send(second);
 			} else if (o instanceof DisconnectRequestMessage) {
-				final ObjectMessage msg = session.createObjectMessage(new DisconnectResponseMessage(getConnectionID(), o.getTargetID(), o.getSenderID(), null));
+				final ObjectMessage msg = createObjectMessage(new DisconnectResponseMessage(getConnectionID(), o.getTargetID(), o.getSenderID(), null));
 				msg.setJMSCorrelationID(omsg.getJMSCorrelationID());
 				jmsTopic.getProducer().send(msg);
 			}
@@ -243,7 +259,8 @@ public abstract class AbstractJMSServerChannel extends AbstractJMSChannel implem
 		Object result = null;
 		if (isActive()) {
 			result = sendAndWait(new DisconnectRequestMessage(getConnectionID(), getLocalID(), target, data), keepAlive);
-		}
+		} else
+			Trace.trace(Activator.PLUGIN_ID, NLS.bind("sendSynch: channel not active...ignoring sendSynch", target, data)); //$NON-NLS-1$
 		Trace.exiting(Activator.PLUGIN_ID, JmsDebugOptions.METHODS_EXITING, this.getClass(), "sendSynch", result); //$NON-NLS-1$
 		return result;
 	}
