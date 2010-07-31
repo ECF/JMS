@@ -20,8 +20,6 @@ Eclipse-BuddyPolicy: global
 Bundle-ClassPath: .,
  lib/activemq5.3.2/commons-logging-1.1.jar,
  lib/activemq5.3.2/geronimo-j2ee-management_1.0_spec-1.0.jar,
- lib/activemq5.3.2/geronimo-jta_1.0.1B_spec-1.0.1.jar,
- lib/activemq5.3.2/activeio-core-3.1.2.jar,
  lib/activemq5.3.2/activemq-core-5.3.2.jar
 Import-Package: org.eclipse.equinox.app,
  org.eclipse.equinox.concurrent.future,
