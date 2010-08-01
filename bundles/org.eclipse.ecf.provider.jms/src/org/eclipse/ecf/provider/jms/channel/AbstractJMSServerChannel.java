@@ -213,9 +213,10 @@ public abstract class AbstractJMSServerChannel extends AbstractJMSChannel implem
 		public void sendConnectResponse(String jmsCorrelationID, ID targetID, ID senderID, Serializable[] messages) throws JMSException {
 			final ObjectMessage first = createObjectMessage(new ConnectResponseMessage(getConnectionID(), targetID, senderID, (messages == null) ? null : messages[0]));
 			first.setJMSCorrelationID(jmsCorrelationID);
+			// send connect response back to client, with jmsCorrelationID set appropriately
 			jmsTopic.getProducer().send(first);
-			final ObjectMessage second = createObjectMessage(new JMSMessage(getConnectionID(), getLocalID(), null, (messages == null) ? null : messages[1]));
-			jmsTopic.getProducer().send(second);
+			// send group membership update to everyone else
+			jmsTopic.getProducer().send(createObjectMessage(new JMSMessage(getConnectionID(), getLocalID(), null, (messages == null) ? null : messages[1])));
 		}
 	}
 
@@ -228,16 +229,10 @@ public abstract class AbstractJMSServerChannel extends AbstractJMSChannel implem
 	protected void handleSynchRequest(ObjectMessage omsg, ECFMessage o) {
 		Trace.entering(Activator.PLUGIN_ID, JmsDebugOptions.METHODS_ENTERING, this.getClass(), "respondToRequest", new Object[] {omsg, o}); //$NON-NLS-1$
 		try {
-			final Serializable[] resp = (Serializable[]) handler.handleSynchEvent(new SynchEvent(this, new Object[] {omsg, o}));
+			handler.handleSynchEvent(new SynchEvent(this, new Object[] {omsg, o}));
 			// this resp is an Serializable[] with two messages, one for the
 			// connect response and the other for everyone else
-			if (o instanceof ConnectRequestMessage) {
-				final ObjectMessage first = createObjectMessage(new ConnectResponseMessage(getConnectionID(), o.getTargetID(), o.getSenderID(), (resp == null) ? null : resp[0]));
-				first.setJMSCorrelationID(omsg.getJMSCorrelationID());
-				jmsTopic.getProducer().send(first);
-				final ObjectMessage second = createObjectMessage(new JMSMessage(getConnectionID(), getLocalID(), null, (resp == null) ? null : resp[1]));
-				jmsTopic.getProducer().send(second);
-			} else if (o instanceof DisconnectRequestMessage) {
+			if (o instanceof DisconnectRequestMessage) {
 				final ObjectMessage msg = createObjectMessage(new DisconnectResponseMessage(getConnectionID(), o.getTargetID(), o.getSenderID(), null));
 				msg.setJMSCorrelationID(omsg.getJMSCorrelationID());
 				jmsTopic.getProducer().send(msg);

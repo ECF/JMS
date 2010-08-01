@@ -382,6 +382,7 @@ public abstract class AbstractJMSChannel extends SocketAddress implements ISynch
 				if (correlation.equals(msg.getJMSCorrelationID())) {
 					reply = msg.getObject();
 					waitDone = true;
+					correlation = null;
 					synch.notify();
 				}
 			} catch (JMSException e) {

@@ -134,11 +134,11 @@ public abstract class AbstractJMSServer extends ServerSOContainer {
 					throw new ContainerConnectException(Messages.AbstractJMSServer_CONNECT_EXCEPTION_CONTAINER_CLOSING);
 				// Now check to see if this request is going to be allowed
 				checkJoin(channel, remoteID, request.getTargetJMSID().getTopicOrQueueName(), jgm.getData());
-
+				// create new local client for remote
 				AbstractJMSServerChannel.Client newclient = channel.createClient(remoteID);
 
 				ID localID = getID();
-
+				// now add client.  This will result in notification to shared objects about new connected group member
 				if (addNewRemoteMember(remoteID, newclient)) {
 					// Get current membership
 					ID[] memberIDs = getGroupMemberIDs();
@@ -146,7 +146,7 @@ public abstract class AbstractJMSServer extends ServerSOContainer {
 					messages[0] = serialize(ContainerMessage.createViewChangeMessage(localID, remoteID, getNextSequenceNumber(), memberIDs, true, null));
 					// Notify existing remotes about new member
 					messages[1] = serialize(ContainerMessage.createViewChangeMessage(localID, null, getNextSequenceNumber(), new ID[] {remoteID}, true, null));
-
+					// send connect response
 					newclient.sendConnectResponse(omsg.getJMSCorrelationID(), request.getTargetID(), request.getSenderID(), messages);
 
 				} else
