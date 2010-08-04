@@ -7,6 +7,8 @@
     <md:mspecNode namePattern="^org\.eclipse\.ecf\.provider\.jms(\..+)?" materializer="workspace"/>
     <md:mspecNode namePattern="^org\.eclipse\.ecf\.provider\.jms.feature?" materializer="workspace"/>
 
+    <md:mspecNode namePattern="^org\.eclipse\.ecf\.tests\.provider\.jms(\..+)?" materializer="workspace"/>
+    
     <md:mspecNode namePattern=".*" installLocation="${targetPlatformPath}"/>
 </md:mspec>
 	
