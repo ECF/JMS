@@ -14,6 +14,7 @@ package org.eclipse.ecf.provider.jms.container;
 import java.io.*;
 import java.net.ConnectException;
 import java.net.SocketAddress;
+import javax.jms.JMSException;
 import javax.jms.ObjectMessage;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -88,17 +89,24 @@ public abstract class AbstractJMSServer extends ServerSOContainer {
 		ObjectMessage omsg = (ObjectMessage) data[0];
 		ECFMessage req = (ECFMessage) data[1];
 		if (req instanceof ConnectRequestMessage) {
-			return handleConnectRequest(omsg, (ConnectRequestMessage) req, (AbstractJMSServerChannel) e.getConnection());
+			handleConnectRequest(omsg, (ConnectRequestMessage) req, (AbstractJMSServerChannel) e.getConnection());
 		} else if (req instanceof DisconnectRequestMessage) {
-			// disconnect them
 			final DisconnectRequestMessage dcm = (DisconnectRequestMessage) req;
-			final IAsynchConnection conn = getConnectionForID(dcm.getSenderID());
-			if (conn != null && conn instanceof AbstractJMSServerChannel.Client) {
-				final AbstractJMSServerChannel.Client client = (AbstractJMSServerChannel.Client) conn;
-				client.handleDisconnect();
+			try {
+				handleDisconnectRequest(omsg.getJMSCorrelationID(), dcm.getTargetID(), dcm.getSenderID());
+			} catch (JMSException e1) {
+				traceAndLogExceptionCatch(IStatus.ERROR, "processSynch", e1); //$NON-NLS-1$
 			}
 		}
 		return null;
+	}
+
+	protected void handleDisconnectRequest(String jmsCorrelationID, ID targetID, ID senderID) {
+		final IAsynchConnection conn = getConnectionForID(senderID);
+		if (conn != null && conn instanceof AbstractJMSServerChannel.Client) {
+			final AbstractJMSServerChannel.Client client = (AbstractJMSServerChannel.Client) conn;
+			client.handleDisconnect(jmsCorrelationID, targetID, senderID);
+		}
 	}
 
 	protected void traceAndLogExceptionCatch(int code, String method, Throwable e) {
@@ -147,11 +155,9 @@ public abstract class AbstractJMSServer extends ServerSOContainer {
 					// Notify existing remotes about new member
 					messages[1] = serialize(ContainerMessage.createViewChangeMessage(localID, null, getNextSequenceNumber(), new ID[] {remoteID}, true, null));
 					// send connect response
-					newclient.sendConnectResponse(omsg.getJMSCorrelationID(), request.getTargetID(), request.getSenderID(), messages);
-
+					newclient.handleConnect(omsg.getJMSCorrelationID(), request.getTargetID(), request.getSenderID(), messages);
 				} else
 					throw new ConnectException(Messages.AbstractJMSServer_CONNECT_EXCEPTION_REFUSED);
-
 			}
 			// notify listeners
 			fireContainerEvent(new ContainerConnectedEvent(this.getID(), remoteID));
