@@ -16,10 +16,10 @@ import javax.jms.ObjectMessage;
 import org.eclipse.ecf.core.identity.ID;
 import org.eclipse.ecf.core.util.ECFException;
 import org.eclipse.ecf.core.util.Trace;
-import org.eclipse.ecf.internal.provider.jms.*;
+import org.eclipse.ecf.internal.provider.jms.Activator;
+import org.eclipse.ecf.internal.provider.jms.JmsDebugOptions;
 import org.eclipse.ecf.provider.comm.*;
 import org.eclipse.ecf.provider.jms.identity.JMSID;
-import org.eclipse.osgi.util.NLS;
 
 /**
  * Abstract JMS server channel.
@@ -34,7 +34,7 @@ public abstract class AbstractJMSServerChannel extends AbstractJMSChannel implem
 		if (localContainerID instanceof JMSID) {
 			setupJMS((JMSID) localContainerID, null);
 		} else
-			throw new ECFException(Messages.AbstractJMSServerChannel_CONNECT_EXCEPTION_CONTAINER_NOT_JMSID);
+			throw new ECFException("localContainerID must be of type JMSID"); //$NON-NLS-1$
 	}
 
 	/*
@@ -44,7 +44,7 @@ public abstract class AbstractJMSServerChannel extends AbstractJMSChannel implem
 	 *      java.lang.Object, int)
 	 */
 	public Object connect(ID remote, Object data, int timeout) throws ECFException {
-		throw new ECFException(Messages.AbstractJMSServerChannel_CONNECT_EXCEPTION_CONTAINER_SERVER_CANNOT_CONNECT);
+		throw new ECFException("Server container cannot connect"); //$NON-NLS-1$
 	}
 
 	public class Client implements ISynchAsynchConnection {
@@ -85,7 +85,7 @@ public abstract class AbstractJMSServerChannel extends AbstractJMSChannel implem
 		}
 
 		public Object connect(ID remote, Object data, int timeout) throws ECFException {
-			throw new ECFException(Messages.AbstractJMSServerChannel_CONNECT_EXCEPTION_CONTAINER_SERVER_CANNOT_CONNECT);
+			throw new ECFException("Server container cannot connect"); //$NON-NLS-1$
 		}
 
 		public void disconnect() {
@@ -256,7 +256,7 @@ public abstract class AbstractJMSServerChannel extends AbstractJMSChannel implem
 		if (isActive()) {
 			result = sendAndWait(new DisconnectRequestMessage(getConnectionID(), getLocalID(), target, data), keepAlive);
 		} else
-			Trace.trace(Activator.PLUGIN_ID, NLS.bind("sendSynch: channel not active...ignoring sendSynch", target, data)); //$NON-NLS-1$
+			Trace.trace(Activator.PLUGIN_ID, "sendSynch: channel not active...ignoring sendSynch to target=" + target); //$NON-NLS-1$
 		Trace.exiting(Activator.PLUGIN_ID, JmsDebugOptions.METHODS_EXITING, this.getClass(), "sendSynch", result); //$NON-NLS-1$
 		return result;
 	}
