@@ -24,7 +24,8 @@ import org.eclipse.ecf.core.identity.ID;
 import org.eclipse.ecf.core.security.IConnectHandlerPolicy;
 import org.eclipse.ecf.core.util.ECFException;
 import org.eclipse.ecf.core.util.Trace;
-import org.eclipse.ecf.internal.provider.jms.*;
+import org.eclipse.ecf.internal.provider.jms.Activator;
+import org.eclipse.ecf.internal.provider.jms.JmsDebugOptions;
 import org.eclipse.ecf.provider.comm.*;
 import org.eclipse.ecf.provider.generic.ContainerMessage;
 import org.eclipse.ecf.provider.generic.ServerSOContainer;
@@ -130,16 +131,16 @@ public abstract class AbstractJMSServer extends ServerSOContainer {
 		try {
 			final ContainerMessage containerMessage = (ContainerMessage) request.getData();
 			if (containerMessage == null)
-				throw new InvalidObjectException(Messages.AbstractJMSServer_CONNECT_EXCEPTION_CONTAINER_MESSAGE_NOT_NULL);
+				throw new InvalidObjectException("ContainerMessage cannot be null"); //$NON-NLS-1$
 			final ID remoteID = containerMessage.getFromContainerID();
 			if (remoteID == null)
-				throw new InvalidObjectException(Messages.AbstractJMSServer_CONNECT_EXCEPTION_REMOTEID_NOT_NULL);
+				throw new InvalidObjectException("remoteID cannot be null"); //$NON-NLS-1$
 			final ContainerMessage.JoinGroupMessage jgm = (ContainerMessage.JoinGroupMessage) containerMessage.getData();
 			if (jgm == null)
-				throw new InvalidObjectException(Messages.AbstractJMSServer_CONNECT_EXCEPTION_JOINGROUPMESSAGE_NOT_NULL);
+				throw new InvalidObjectException("JoinGroupMessage cannot be null"); //$NON-NLS-1$
 			synchronized (getGroupMembershipLock()) {
 				if (isClosing)
-					throw new ContainerConnectException(Messages.AbstractJMSServer_CONNECT_EXCEPTION_CONTAINER_CLOSING);
+					throw new ContainerConnectException("Container is closing"); //$NON-NLS-1$
 				// Now check to see if this request is going to be allowed
 				checkJoin(channel, remoteID, request.getTargetJMSID().getTopicOrQueueName(), jgm.getData());
 				// create new local client for remote
@@ -157,7 +158,7 @@ public abstract class AbstractJMSServer extends ServerSOContainer {
 					// send connect response
 					newclient.handleConnect(omsg.getJMSCorrelationID(), request.getTargetID(), request.getSenderID(), messages);
 				} else
-					throw new ConnectException(Messages.AbstractJMSServer_CONNECT_EXCEPTION_REFUSED);
+					throw new ConnectException("Connection refused by server"); //$NON-NLS-1$
 			}
 			// notify listeners
 			fireContainerEvent(new ContainerConnectedEvent(this.getID(), remoteID));

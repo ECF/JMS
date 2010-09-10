@@ -22,7 +22,6 @@ import org.eclipse.ecf.internal.provider.jms.Activator;
 import org.eclipse.ecf.internal.provider.jms.JmsDebugOptions;
 import org.eclipse.ecf.provider.comm.*;
 import org.eclipse.ecf.provider.jms.identity.JMSID;
-import org.eclipse.osgi.util.NLS;
 
 /**
  * Abstract JMSChannel implementation. This class is superclass to
@@ -322,7 +321,7 @@ public abstract class AbstractJMSChannel extends SocketAddress implements ISynch
 				Activator.getDefault().log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, IStatus.ERROR, "Exception on handleTopicMessage", e)); //$NON-NLS-1$
 			}
 		} else
-			Trace.trace(Activator.PLUGIN_ID, NLS.bind("handleTopicMessage: channel not active...ignoring message {0} with JMSMessage {1}", msg, jmsmsg)); //$NON-NLS-1$
+			Trace.trace(Activator.PLUGIN_ID, "handleTopicMessage: channel not active...ignoring message " + msg + " with JMSMessage " + jmsmsg); //$NON-NLS-1$ //$NON-NLS-2$
 		Trace.exiting(Activator.PLUGIN_ID, JmsDebugOptions.METHODS_EXITING, this.getClass(), "handleTopicMessage"); //$NON-NLS-1$
 	}
 
@@ -427,11 +426,11 @@ public abstract class AbstractJMSChannel extends SocketAddress implements ISynch
 						ECFMessage ecfmsg = (ECFMessage) o;
 						ID fromID = ecfmsg.getSenderID();
 						if (fromID == null) {
-							Trace.exiting(Activator.PLUGIN_ID, JmsDebugOptions.METHODS_ENTERING, this.getClass(), NLS.bind("onMessage: fromID=null...ignoring ECFMessage {0}", ecfmsg)); //$NON-NLS-1$
+							Trace.exiting(Activator.PLUGIN_ID, JmsDebugOptions.METHODS_ENTERING, this.getClass(), "onMessage: fromID=null...ignoring ECFMessage " + ecfmsg); //$NON-NLS-1$
 							return;
 						}
 						if (fromID.equals(getLocalID())) {
-							Trace.exiting(Activator.PLUGIN_ID, JmsDebugOptions.METHODS_ENTERING, this.getClass(), NLS.bind("onMessage:  fromID=localID...ignoring ECFMessage {0}", ecfmsg)); //$NON-NLS-1$
+							Trace.exiting(Activator.PLUGIN_ID, JmsDebugOptions.METHODS_ENTERING, this.getClass(), "onMessage:  fromID=localID...ignoring ECFMessage " + ecfmsg); //$NON-NLS-1$
 							return;
 						}
 						// Get targetID...it's either null, and the message is intended for everyone, or it's 
@@ -451,18 +450,15 @@ public abstract class AbstractJMSChannel extends SocketAddress implements ISynch
 								else if (ecfmsg instanceof SynchResponseMessage)
 									handleSynchResponse(omg, ecfmsg);
 								else
-									Trace.trace(Activator.PLUGIN_ID, NLS.bind("onMessage.msg invalid message to {0}" //$NON-NLS-1$
-											, targetID));
+									Trace.trace(Activator.PLUGIN_ID, "onMessage.msg invalid message to " + targetID); //$NON-NLS-1$
 							} else
-								Trace.trace(Activator.PLUGIN_ID, NLS.bind("onMessage.msg ECFMessage {0} not intended for {1}" //$NON-NLS-1$
-										, ecfmsg, targetID));
+								Trace.trace(Activator.PLUGIN_ID, "onMessage.msg ECFMessage " + ecfmsg + " not intended for " + targetID); //$NON-NLS-1$ //$NON-NLS-2$
 						}
 					} else
 						// received bogus message...ignore
-						Trace.trace(Activator.PLUGIN_ID, NLS.bind("onMessage: received non-ECFMessage...ignoring {0}" //$NON-NLS-1$
-								, o));
+						Trace.trace(Activator.PLUGIN_ID, "onMessage: received non-ECFMessage...ignoring " + o); //$NON-NLS-1$
 				} else
-					Trace.trace(Activator.PLUGIN_ID, NLS.bind("onMessage: received non-object message...ignoring {0}", msg)); //$NON-NLS-1$
+					Trace.trace(Activator.PLUGIN_ID, "onMessage: received non-object message...ignoring " + msg); //$NON-NLS-1$
 			} catch (Exception e) {
 				traceAndLogExceptionCatch(IStatus.ERROR, "onMessage: Unexpected Exception", e); //$NON-NLS-1$
 			}

@@ -16,7 +16,6 @@ import org.eclipse.core.runtime.*;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.ecf.core.identity.ID;
 import org.eclipse.ecf.core.util.ECFException;
-import org.eclipse.ecf.internal.provider.remoteservice.Messages;
 import org.eclipse.ecf.provider.remoteservice.generic.*;
 import org.eclipse.ecf.remoteservice.*;
 
@@ -240,9 +239,8 @@ public class LBRegistrySharedObject extends RegistrySharedObject {
 	}
 
 	private IRemoteServiceRegistration registerLBRemoteService(String[] clazzes, Object service, Dictionary properties) {
-		final int size = clazzes.length;
-		if (size == 0) {
-			throw new IllegalArgumentException(Messages.RegistrySharedObject_EXCEPTION_SERVICE_CLASSES_LIST_EMPTY);
+		if (clazzes == null || clazzes.length == 0) {
+			throw new IllegalArgumentException("Service classes length cannot be null or of length 0"); //$NON-NLS-1$
 		}
 
 		final String[] copy = new String[clazzes.length];

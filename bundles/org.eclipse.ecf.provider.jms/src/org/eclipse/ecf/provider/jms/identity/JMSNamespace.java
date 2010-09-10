@@ -12,7 +12,6 @@ package org.eclipse.ecf.provider.jms.identity;
 
 import java.net.URI;
 import org.eclipse.ecf.core.identity.*;
-import org.eclipse.ecf.internal.provider.jms.Messages;
 
 public class JMSNamespace extends Namespace {
 	private static final long serialVersionUID = 3761689000414884151L;
@@ -37,9 +36,9 @@ public class JMSNamespace extends Namespace {
 					return new JMSID(this, ((URI) args[0]).toString());
 				}
 			}
-			throw new IllegalArgumentException(Messages.JMSNamespace_EXCEPTION_XMPP_ARGS_INVALID);
+			throw new IllegalArgumentException("Parameters invalid for JMSID creation.  Must be of either String or URI type"); //$NON-NLS-1$
 		} catch (Exception e) {
-			throw new IDCreateException(Messages.JMSNamespace_EXCEPTION_IDCREATION, e);
+			throw new IDCreateException("JMSID creation failed", e); //$NON-NLS-1$
 		}
 	}
 

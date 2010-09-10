@@ -15,7 +15,6 @@ import java.util.Map;
 import org.eclipse.ecf.core.events.ContainerDisconnectedEvent;
 import org.eclipse.ecf.core.identity.*;
 import org.eclipse.ecf.core.sharedobject.util.IQueueEnqueue;
-import org.eclipse.ecf.internal.provider.jms.Messages;
 import org.eclipse.ecf.provider.comm.ISynchAsynchConnection;
 import org.eclipse.ecf.provider.comm.SynchEvent;
 import org.eclipse.ecf.provider.generic.*;
@@ -104,7 +103,7 @@ public abstract class AbstractJMSClient extends ClientSOContainer {
 		} else if (serverData instanceof ContainerMessage) {
 			cr = serverData;
 		} else {
-			throw new ConnectException(Messages.AbstractJMSClient_EXCEPTION_INVALID_SERVER_RESPONSE);
+			throw new ConnectException("Invalid server response to connect request"); //$NON-NLS-1$
 		}
 		return super.handleConnectResponse(originalTarget, cr);
 	}
