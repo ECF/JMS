@@ -44,12 +44,18 @@ public abstract class AbstractJMSChannel extends SocketAddress implements ISynch
 	protected List connectionListeners = new ArrayList();
 	protected boolean isStopping = false;
 
-	public AbstractJMSChannel(ISynchAsynchEventHandler hand, int keepAlive) {
+	public AbstractJMSChannel(ISynchAsynchEventHandler hand, int keepAlive, Map properties) {
 		this.handler = hand;
 		Assert.isNotNull(this.handler);
 		this.localContainerID = hand.getEventHandlerID();
 		Assert.isNotNull(localContainerID);
 		this.keepAlive = keepAlive;
+		if (properties != null)
+			this.properties = properties;
+	}
+
+	public AbstractJMSChannel(ISynchAsynchEventHandler hand, int keepAlive) {
+		this(hand, keepAlive, null);
 	}
 
 	/**
