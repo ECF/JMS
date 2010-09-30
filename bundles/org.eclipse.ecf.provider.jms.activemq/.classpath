@@ -5,6 +5,6 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry exported="true" kind="lib" path="lib/activemq5.3.2/commons-logging-1.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/activemq5.3.2/geronimo-j2ee-management_1.0_spec-1.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/activemq5.3.2/activemq-core-5.3.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/activemq5.3.2/activemq-core-5.3.2.jar" sourcepath="C:/apache-activemq-5.3.2/src/activemq-parent-5.3.2/activemq-core/activemq-core.5.3.2.zip"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
