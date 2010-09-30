@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.ecf.provider.jms_feature"
       label="Eclipse Communication Framework JMS Provider"
-      version="2.1.0.qualifier"
+      version="2.2.0.qualifier"
       provider-name="Eclipse.org">
 
    <description>
@@ -276,7 +276,7 @@ More specifically:
          unpack="false"/>
 
    <plugin
-         id="org.eclipse.ecf.provider.jms.activemq.ui"
+         id="org.eclipse.ecf.provider.jms.activemq.broker"
          download-size="0"
          install-size="0"
          version="0.0.0"
