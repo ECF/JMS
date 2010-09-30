@@ -66,7 +66,7 @@ public class ActiveMQJMSQueueConsumerContainerInstantiator extends
 	}
 
 	public String[] getSupportedIntents(ContainerTypeDescription description) {
-		List results = new ArrayList();
+		List<String> results = new ArrayList<String>();
 		for (int i = 0; i < genericProviderIntents.length; i++) {
 			results.add(genericProviderIntents[i]);
 		}

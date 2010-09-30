@@ -32,7 +32,7 @@ public class ActiveMQJMSServer implements IApplication {
 	private String[] mungeArguments(String originalArgs[]) {
 		if (originalArgs == null)
 			return new String[0];
-		final List l = new ArrayList();
+		final List<String> l = new ArrayList<String>();
 		for (int i = 0; i < originalArgs.length; i++)
 			if (!originalArgs[i].equals("-pdelaunch")) //$NON-NLS-1$
 				l.add(originalArgs[i]);
