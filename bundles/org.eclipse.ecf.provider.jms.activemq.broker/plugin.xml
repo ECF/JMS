@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ecf.containerFactory">
+      <containerFactory
+            class="org.eclipse.ecf.internal.provider.jms.activemq.broker.ActiveMQJMSBrokerContainerInstantiator"
+            description="ActiveMQ Broker Container"
+            name="ecf.jms.activemq.broker">
+      </containerFactory>
+   </extension>
+
+</plugin>
