@@ -70,7 +70,7 @@ public class ActiveMQJMSServerContainerInstantiator extends
 	}
 
 	public String[] getSupportedIntents(ContainerTypeDescription description) {
-		List results = new ArrayList();
+		List<String> results = new ArrayList<String>();
 		for (int i = 0; i < genericProviderIntents.length; i++) {
 			results.add(genericProviderIntents[i]);
 		}
@@ -81,8 +81,8 @@ public class ActiveMQJMSServerContainerInstantiator extends
 	}
 
 	public String[] getImportedConfigs(ContainerTypeDescription description, String[] exporterSupportedConfigs) {
-		List results = new ArrayList();
-		List supportedConfigs = Arrays.asList(exporterSupportedConfigs);
+		List<String> results = new ArrayList<String>();
+		List<String> supportedConfigs = Arrays.asList(exporterSupportedConfigs);
 		// For a manager, if a client is exporter then we are an importer
 		if (JMS_MANAGER_NAME.equals(description.getName())) {
 			if (supportedConfigs.contains(ActiveMQJMSClientContainerInstantiator.JMS_CLIENT_NAME))
