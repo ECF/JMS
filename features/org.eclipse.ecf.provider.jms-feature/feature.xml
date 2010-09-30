@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="org.eclipse.ecf.provider.jms_feature"
+      id="org.eclipse.ecf.provider.jms.feature"
       label="Eclipse Communication Framework JMS Provider"
       version="2.2.0.qualifier"
       provider-name="Eclipse.org">
