@@ -244,22 +244,6 @@ More specifically:
    limitations under the License.
    </license>
 
-   <requires>
-      <import plugin="org.eclipse.equinox.common"/>
-      <import plugin="org.eclipse.core.jobs"/>
-      <import plugin="org.eclipse.ecf"/>
-      <import plugin="org.eclipse.ecf.identity"/>
-      <import plugin="org.eclipse.ecf.sharedobject"/>
-      <import plugin="org.eclipse.ecf.provider"/>
-      <import plugin="org.eclipse.ecf.provider.remoteservice"/>
-      <import plugin="org.eclipse.ecf.remoteservice"/>
-      <import plugin="org.eclipse.equinox.concurrent"/>
-      <import plugin="org.eclipse.osgi"/>
-      <import plugin="org.eclipse.osgi.services"/>
-      <import plugin="org.eclipse.equinox.app"/>
-      <import plugin="org.eclipse.equinox.common"/>
-   </requires>
-
    <plugin
          id="org.eclipse.ecf.provider.jms"
          download-size="0"
