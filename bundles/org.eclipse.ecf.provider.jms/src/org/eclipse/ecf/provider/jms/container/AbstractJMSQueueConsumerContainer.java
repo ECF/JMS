@@ -183,6 +183,10 @@ public abstract class AbstractJMSQueueConsumerContainer extends AbstractContaine
 		return registry.asyncGetRemoteServiceReferences(target, clazz, filter);
 	}
 
+	public IFuture asyncGetRemoteServiceReferences(ID target, ID[] idFilter, String clazz, String filter) {
+		return registry.asyncGetRemoteServiceReferences(target, idFilter, clazz, filter);
+	}
+
 	public IRemoteFilter createRemoteFilter(String filter) throws InvalidSyntaxException {
 		return registry.createRemoteFilter(filter);
 	}
@@ -213,6 +217,10 @@ public abstract class AbstractJMSQueueConsumerContainer extends AbstractContaine
 
 	public IRemoteServiceReference[] getRemoteServiceReferences(ID target, String clazz, String filter) throws InvalidSyntaxException, ContainerConnectException {
 		return registry.getRemoteServiceReferences(target, clazz, filter);
+	}
+
+	public IRemoteServiceReference[] getRemoteServiceReferences(ID target, ID[] idFilter, String clazz, String filter) throws InvalidSyntaxException, ContainerConnectException {
+		return registry.getRemoteServiceReferences(target, idFilter, clazz, filter);
 	}
 
 	public IRemoteServiceRegistration registerRemoteService(String[] clazzes, Object service, Dictionary properties) {
