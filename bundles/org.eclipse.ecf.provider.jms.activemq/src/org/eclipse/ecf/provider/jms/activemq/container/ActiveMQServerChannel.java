@@ -13,7 +13,7 @@ import org.eclipse.ecf.provider.comm.ISynchAsynchEventHandler;
 import org.eclipse.ecf.provider.jms.channel.AbstractJMSServerChannel;
 import org.eclipse.ecf.provider.jms.identity.JMSID;
 
-class ActiveMQServerChannel extends AbstractJMSServerChannel {
+public class ActiveMQServerChannel extends AbstractJMSServerChannel {
 
 	private static final long serialVersionUID = -2348383004973299553L;
 

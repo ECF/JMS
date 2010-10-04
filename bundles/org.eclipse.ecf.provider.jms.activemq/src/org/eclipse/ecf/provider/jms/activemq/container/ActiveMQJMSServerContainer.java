@@ -45,8 +45,11 @@ public class ActiveMQJMSServerContainer extends AbstractJMSServer {
 
 	public void dispose() {
 		super.dispose();
-		getConnection().disconnect();
-		setConnection(null);
+		ISynchAsynchConnection connection = getConnection();
+		if (connection != null) {
+			connection.disconnect();
+			setConnection(null);
+		}
 	}
 
 }
