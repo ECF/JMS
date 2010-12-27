@@ -235,6 +235,10 @@ public abstract class AbstractJMSQueueConsumerContainer extends AbstractContaine
 		registry.setConnectContextForAuthentication(connectContext);
 	}
 
+	public boolean setRemoteServiceCallPolicy(IRemoteServiceCallPolicy policy) {
+		return registry.setRemoteServiceCallPolicy(policy);
+	}
+
 	public boolean ungetRemoteService(IRemoteServiceReference reference) {
 		return registry.ungetRemoteService(reference);
 	}
