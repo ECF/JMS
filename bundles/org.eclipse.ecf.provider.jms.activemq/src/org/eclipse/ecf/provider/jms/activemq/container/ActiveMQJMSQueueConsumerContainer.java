@@ -15,6 +15,7 @@ import org.apache.activemq.ActiveMQConnectionFactory;
 import org.eclipse.ecf.core.util.ECFException;
 import org.eclipse.ecf.provider.jms.container.AbstractJMSQueueConsumerContainer;
 import org.eclipse.ecf.provider.jms.identity.JMSID;
+import org.eclipse.ecf.remoteservice.IRemoteServiceCallPolicy;
 
 public class ActiveMQJMSQueueConsumerContainer extends
 		AbstractJMSQueueConsumerContainer {
@@ -46,6 +47,11 @@ public class ActiveMQJMSQueueConsumerContainer extends
 		} catch (JMSException e) {
 			throw new ECFException("Could not connect to queueID=" + queueID, e); //$NON-NLS-1$
 		}
+	}
+
+	public boolean setRemoteServiceCallPolicy(IRemoteServiceCallPolicy policy) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 }
