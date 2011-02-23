@@ -32,4 +32,11 @@ public class ActiveMQRemoteServiceRegisterTest extends AbstractRemoteServiceRegi
 	protected String getServerIdentity() {
 		return ActiveMQ.TARGET_NAME;
 	}
+	
+	// XXX this test in superclass is invalid because it depends upon 
+	public void testRegisterOnCreatedServer() throws Exception {
+		testRegisterOnCreatedServerWithIdentity();
+	}
+
+
 }
