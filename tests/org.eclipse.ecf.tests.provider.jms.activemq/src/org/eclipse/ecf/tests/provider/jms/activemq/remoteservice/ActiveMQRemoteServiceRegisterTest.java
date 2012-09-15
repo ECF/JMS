@@ -13,10 +13,28 @@ package org.eclipse.ecf.tests.provider.jms.activemq.remoteservice;
 import org.eclipse.ecf.core.identity.ID;
 import org.eclipse.ecf.core.identity.IDFactory;
 import org.eclipse.ecf.tests.osgi.services.distribution.AbstractRemoteServiceRegisterTest;
+import org.eclipse.ecf.tests.provider.jms.BrokerUtil;
 import org.eclipse.ecf.tests.provider.jms.activemq.ActiveMQ;
 
 public class ActiveMQRemoteServiceRegisterTest extends AbstractRemoteServiceRegisterTest {
 
+	private BrokerUtil broker;
+	
+	@Override
+	protected void setUp() throws Exception {
+		broker = new BrokerUtil(getContainerManager());
+		super.setUp();
+	}
+	
+	@Override
+	protected void tearDown() throws Exception {
+		super.tearDown();
+		if (broker != null) {
+			broker.dispose();
+			broker = null;
+		}
+	}
+	
 	protected String getServerContainerTypeName() {
 		return ActiveMQ.SERVER_CONTAINER_NAME;
 	}

@@ -34,6 +34,7 @@ public class ActiveMQJMSContainerTest extends JMSContainerAbstractTestCase {
 	public void testConnectClient() throws Exception {
 		IContainer client = getClients()[0];
 		ID targetID = IDFactory.getDefault().createID(client.getConnectNamespace(),new Object [] { getServerIdentity() });
+		Thread.sleep(3000);
 		client.connect(targetID, null);
 		Thread.sleep(3000);
 	}

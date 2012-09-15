@@ -23,6 +23,7 @@ import org.eclipse.ecf.remoteservice.IRemoteServiceReference;
 import org.eclipse.ecf.remoteservice.IRemoteServiceRegistration;
 import org.eclipse.ecf.remoteservice.events.IRemoteServiceEvent;
 import org.eclipse.ecf.tests.ContainerAbstractTestCase;
+import org.eclipse.ecf.tests.provider.jms.BrokerUtil;
 import org.osgi.framework.InvalidSyntaxException;
 
 /**
@@ -48,12 +49,26 @@ public abstract class AbstractRemoteServiceTestCase extends ContainerAbstractTes
 	 * @see junit.framework.TestCase#setUp()
 	 */
 	protected void setUp() throws Exception {
+		setupBroker();
 		super.setUp();
 		setClientCount(2);
 		createServerAndClients();
 		connectClients();
 		setupRemoteServiceAdapters();
 		addRemoteServiceListeners();
+	}
+
+	private void setupBroker() throws Exception {
+		broker = new BrokerUtil(getContainerManager());
+	}
+
+	private BrokerUtil broker;
+	
+	private void tearDownBroker() throws Exception {
+		if (broker != null) {
+			broker.dispose();
+			broker = null;
+		}
 	}
 
 	/*
@@ -64,6 +79,7 @@ public abstract class AbstractRemoteServiceTestCase extends ContainerAbstractTes
 	protected void tearDown() throws Exception {
 		cleanUpServerAndClients();
 		super.tearDown();
+		tearDownBroker();
 	}
 
 	protected ID createServerID() throws Exception {

@@ -18,13 +18,27 @@ public abstract class JMSContainerAbstractTestCase extends ContainerAbstractTest
 	}
 
 	protected void setUp() throws Exception {
+		setupBroker();
 		setClientCount(1);
 		createServerAndClients();
 		super.setUp();
 	}
 
+	private void setupBroker() throws Exception {
+		broker = new BrokerUtil(getContainerManager());
+	}
+
+	private BrokerUtil broker;
+	
+	private void tearDownBroker() throws Exception {
+		if (broker != null) {
+			broker.dispose();
+			broker = null;
+		}
+	}
 	protected void tearDown() throws Exception {
 		cleanUpServerAndClients();
+		tearDownBroker();
 		super.tearDown();
 	}
 

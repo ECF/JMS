@@ -14,10 +14,24 @@ import java.util.Properties;
 import org.eclipse.ecf.core.identity.ID;
 import org.eclipse.ecf.core.identity.IDFactory;
 import org.eclipse.ecf.tests.osgi.services.distribution.AbstractRemoteServiceAccessTest;
+import org.eclipse.ecf.tests.provider.jms.BrokerUtil;
 import org.eclipse.ecf.tests.provider.jms.activemq.ActiveMQ;
 
 
 public class ActiveMQClientRemoteServiceAccessTest extends AbstractRemoteServiceAccessTest {
+
+	private void setupBroker() throws Exception {
+		broker = new BrokerUtil(getContainerManager());
+	}
+
+	private BrokerUtil broker;
+	
+	private void tearDownBroker() throws Exception {
+		if (broker != null) {
+			broker.dispose();
+			broker = null;
+		}
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -25,6 +39,7 @@ public class ActiveMQClientRemoteServiceAccessTest extends AbstractRemoteService
 	 * @see junit.framework.TestCase#setUp()
 	 */
 	protected void setUp() throws Exception {
+		setupBroker();
 		super.setUp();
 		setClientCount(2);
 		createServerAndClients();
@@ -36,6 +51,7 @@ public class ActiveMQClientRemoteServiceAccessTest extends AbstractRemoteService
 	protected void tearDown() throws Exception {
 		cleanUpServerAndClients();
 		super.tearDown();
+		tearDownBroker();
 	}
 
 	protected String getServerContainerName() {
