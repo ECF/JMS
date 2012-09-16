@@ -30,7 +30,7 @@
 <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-os ${target.os} -ws ${target.ws} -arch ${target.arch} -nl ${target.nl} -consoleLog -console"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="org.eclipse.ecf.tests.provider.jms.activemq"/>
 <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.pde.ui.workbenchClasspathProvider"/>
-<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Xms40m -Xmx384m&#13;&#10;-Dorg.eclipse.ecf.osgi.services.discovery.allowLoopbackReference=true&#13;&#10;&#13;&#10;-Dnet.slp.port=65428&#13;&#10;-Dnet.slp.interfaces=127.0.0.1&#13;&#10;-Dnet.slp.rediscover=5000&#13;&#10;-Dnet.slp.failercount=3&#13;&#10;-Dnet.slp.multicastTimeouts=10,25,50,100,250,500,1000&#13;&#10;-Dnet.slp.multicastMaximumWait=2000&#13;&#10;&#13;&#10;-XX:+UnlockDiagnosticVMOptions&#13;&#10;-XX:+UnsyncloadClass"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Xms100m -Xmx512m&#13;&#10;-XX:+UnlockDiagnosticVMOptions &#13;&#10;-XX:+UnsyncloadClass&#13;&#10;&#13;&#10;-Dorg.eclipse.ecf.osgi.services.discovery.allowLoopbackReference=true&#13;&#10;&#13;&#10;-Dnet.slp.port=65428&#13;&#10;-Dnet.slp.interfaces=127.0.0.1&#13;&#10;-Dnet.slp.rediscover=5000&#13;&#10;-Dnet.slp.failercount=3&#13;&#10;-Dnet.slp.multicastTimeouts=10,25,50,100,250,500,1000&#13;&#10;-Dnet.slp.multicastMaximumWait=2000"/>
 <stringAttribute key="pde.version" value="3.3"/>
 <stringAttribute key="product" value="org.eclipse.buckminster.cmdline.product"/>
 <booleanAttribute key="run_in_ui_thread" value="true"/>

@@ -48,7 +48,7 @@ public class ActiveMQJMSServerContainer extends AbstractJMSServer {
 		ISynchAsynchConnection connection = getConnection();
 		if (connection != null) {
 			connection.disconnect();
-			setConnection(null);
+			//setConnection(null);
 		}
 	}
 

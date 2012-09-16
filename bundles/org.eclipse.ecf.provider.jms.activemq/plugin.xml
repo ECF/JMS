@@ -7,7 +7,8 @@
       <containerFactory
             class="org.eclipse.ecf.internal.provider.jms.activemq.ActiveMQJMSClientContainerInstantiator"
             description="ActiveMQ Topic Client"
-            name="ecf.jms.activemq.tcp.client">
+            name="ecf.jms.activemq.tcp.client"
+            server="true">
       </containerFactory>
    </extension>
 
@@ -16,7 +17,8 @@
       <containerFactory
             class="org.eclipse.ecf.internal.provider.jms.activemq.ActiveMQJMSServerContainerInstantiator"
             description="ActiveMQ Topic Manager"
-            name="ecf.jms.activemq.tcp.manager">
+            name="ecf.jms.activemq.tcp.manager"
+            server="true">
       </containerFactory>
    </extension>
 
@@ -25,7 +27,8 @@
       <containerFactory
             class="org.eclipse.ecf.internal.provider.jms.activemq.ActiveMQJMSQueueProducerContainerInstantiator"
             description="ActiveMQ Load Balancing Service Host Container"
-            name="ecf.jms.activemq.tcp.manager.lb.svchost">
+            name="ecf.jms.activemq.tcp.manager.lb.svchost"
+            server="true">
       </containerFactory>
    </extension>
 
@@ -34,7 +37,8 @@
       <containerFactory
             class="org.eclipse.ecf.internal.provider.jms.activemq.ActiveMQJMSQueueConsumerContainerInstantiator"
             description="ActiveMQ Load Balancing Server Container"
-            name="ecf.jms.activemq.tcp.lb.server">
+            name="ecf.jms.activemq.tcp.lb.server"
+            server="true">
       </containerFactory>
    </extension>
 
