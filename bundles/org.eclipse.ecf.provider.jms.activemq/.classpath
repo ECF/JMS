@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry exported="true" kind="lib" path="lib/activemq5.8.0/slf4j-api-1.6.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/activemq5.8.0/geronimo-j2ee-management_1.1_spec-1.0.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/activemq5.8.0/activemq-client-5.8.0.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry exported="true" kind="lib" path="lib/activemq5.3.2/commons-logging-1.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/activemq5.3.2/geronimo-j2ee-management_1.0_spec-1.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/activemq5.3.2/activemq-core-5.3.2.jar" sourcepath="C:/apache-activemq-5.3.2/src/activemq-parent-5.3.2/activemq-core/activemq-core.5.3.2.zip"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

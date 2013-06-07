@@ -62,8 +62,12 @@ public class ActiveMQJMSServer implements IApplication {
 					ActiveMQJMSServerContainer.DEFAULT_KEEPALIVE);
 
 			synchronized (this) {
+				try {
 				serverContainer = new ActiveMQJMSServerContainer(config);
 				serverContainer.start();
+				} catch (Throwable t) {
+					t.printStackTrace();
+				}
 				// Wait until stopped
 				this.wait();
 			}
