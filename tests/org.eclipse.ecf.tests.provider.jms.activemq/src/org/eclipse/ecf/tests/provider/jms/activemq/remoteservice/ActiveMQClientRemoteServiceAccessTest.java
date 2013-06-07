@@ -74,6 +74,7 @@ public class ActiveMQClientRemoteServiceAccessTest extends AbstractRemoteService
 		Properties props = new Properties();
 		props.put(SERVICE_EXPORTED_CONFIGS, getClientContainerName());
 		props.put(SERVICE_EXPORTED_CONTAINER_ID, getClient(0).getID());
+		props.put("ecf.endpoint.connecttarget.id", getClient(0).getConnectedID().getName());
 		props.put(SERVICE_EXPORTED_INTERFACES,SERVICE_EXPORTED_INTERFACES_WILDCARD);
 		return props;
 	}
