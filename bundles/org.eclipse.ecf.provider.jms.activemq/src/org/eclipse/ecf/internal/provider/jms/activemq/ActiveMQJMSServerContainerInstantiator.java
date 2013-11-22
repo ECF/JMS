@@ -11,6 +11,7 @@ package org.eclipse.ecf.internal.provider.jms.activemq;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.ecf.core.ContainerCreateException;
 import org.eclipse.ecf.core.ContainerTypeDescription;
@@ -28,21 +29,24 @@ public class ActiveMQJMSServerContainerInstantiator extends
 	protected static final String[] jmsIntents = { "JMS" };
 
 	protected static final String JMS_MANAGER_NAME = "ecf.jms.activemq.tcp.manager";
-	
+
+	public static final String ID_PARAM = "id";
+
 	public ActiveMQJMSServerContainerInstantiator() {
 
 	}
 
 	private JMSID getJMSIDFromParameter(Object p) {
 		if (p instanceof String) {
-			return (JMSID) IDFactory.getDefault().createID(
-					JMSNamespace.NAME, (String) p);
-		} else if (p instanceof JMSID) { 
+			return (JMSID) IDFactory.getDefault().createID(JMSNamespace.NAME,
+					(String) p);
+		} else if (p instanceof JMSID) {
 			return (JMSID) p;
-		} else return (JMSID) IDFactory.getDefault().createID(
-				JMSNamespace.NAME, ActiveMQJMSServerContainer.DEFAULT_SERVER_ID);
+		} else
+			return (JMSID) IDFactory.getDefault().createID(JMSNamespace.NAME,
+					ActiveMQJMSServerContainer.DEFAULT_SERVER_ID);
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -53,8 +57,19 @@ public class ActiveMQJMSServerContainerInstantiator extends
 	public IContainer createInstance(ContainerTypeDescription description,
 			Object[] args) throws ContainerCreateException {
 		try {
+			JMSID serverID = null;
+			if (args == null)
+				throw new NullPointerException("Args cannot be null");
+			if (args.length > 0 && (args[0] instanceof Map)) {
+				@SuppressWarnings("rawtypes")
+				Map map = (Map) args[0];
+				Object o = map.get(ID_PARAM);
+				if (o != null && o instanceof String) 
+					serverID = getJMSIDFromParameter(o);
+			} else
+				serverID = (args == null || args.length < 1) ? getJMSIDFromParameter((String) ActiveMQJMSServerContainer.DEFAULT_SERVER_ID)
+						: getJMSIDFromParameter(args[0]);
 			Integer ka = null;
-			JMSID serverID = (args == null || args.length < 1)?getJMSIDFromParameter((String) ActiveMQJMSServerContainer.DEFAULT_SERVER_ID):getJMSIDFromParameter(args[0]);
 			if (args != null && args.length > 1)
 				ka = getIntegerFromArg(args[1]);
 			if (ka == null)
@@ -80,12 +95,14 @@ public class ActiveMQJMSServerContainerInstantiator extends
 		return (String[]) results.toArray(new String[] {});
 	}
 
-	public String[] getImportedConfigs(ContainerTypeDescription description, String[] exporterSupportedConfigs) {
+	public String[] getImportedConfigs(ContainerTypeDescription description,
+			String[] exporterSupportedConfigs) {
 		List<String> results = new ArrayList<String>();
 		List<String> supportedConfigs = Arrays.asList(exporterSupportedConfigs);
 		// For a manager, if a client is exporter then we are an importer
 		if (JMS_MANAGER_NAME.equals(description.getName())) {
-			if (supportedConfigs.contains(ActiveMQJMSClientContainerInstantiator.JMS_CLIENT_NAME))
+			if (supportedConfigs
+					.contains(ActiveMQJMSClientContainerInstantiator.JMS_CLIENT_NAME))
 				results.add(JMS_MANAGER_NAME);
 		}
 		if (results.size() == 0)
@@ -96,6 +113,5 @@ public class ActiveMQJMSServerContainerInstantiator extends
 	public String[] getSupportedConfigs(ContainerTypeDescription description) {
 		return new String[] { JMS_MANAGER_NAME };
 	}
-
 
 }
