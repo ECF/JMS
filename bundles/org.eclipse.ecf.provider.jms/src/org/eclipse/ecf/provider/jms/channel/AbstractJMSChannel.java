@@ -8,8 +8,7 @@
  ******************************************************************************/
 package org.eclipse.ecf.provider.jms.channel;
 
-import java.io.IOException;
-import java.io.Serializable;
+import java.io.*;
 import java.net.ConnectException;
 import java.net.SocketAddress;
 import java.util.*;
@@ -21,6 +20,7 @@ import org.eclipse.ecf.core.util.Trace;
 import org.eclipse.ecf.internal.provider.jms.Activator;
 import org.eclipse.ecf.internal.provider.jms.JmsDebugOptions;
 import org.eclipse.ecf.provider.comm.*;
+import org.eclipse.ecf.provider.generic.SOContainer;
 import org.eclipse.ecf.provider.jms.identity.JMSID;
 
 /**
@@ -34,7 +34,7 @@ public abstract class AbstractJMSChannel extends SocketAddress implements ISynch
 	private static long correlationID = 0;
 	protected Connection connection = null;
 	protected Session session = null;
-	protected JmsTopic jmsTopic = null;
+	protected JmsTopicSession jmsTopicSession = null;
 	protected ID localContainerID;
 	protected boolean connected = false;
 	private boolean started = false;
@@ -43,6 +43,10 @@ public abstract class AbstractJMSChannel extends SocketAddress implements ISynch
 	private Map properties = new HashMap();
 	protected List connectionListeners = new ArrayList();
 	protected boolean isStopping = false;
+	protected Object waitResponse = new Object();
+	protected String correlation = null;
+	protected Serializable reply = null;
+	protected boolean waitDone;
 
 	public AbstractJMSChannel(ISynchAsynchEventHandler hand, int keepAlive, Map properties) {
 		this.handler = hand;
@@ -58,20 +62,8 @@ public abstract class AbstractJMSChannel extends SocketAddress implements ISynch
 		this(hand, keepAlive, null);
 	}
 
-	/**
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.ecf.provider.comm.IConnection#connect(org.eclipse.ecf.core.identity.ID,
-	 *      java.lang.Object, int)
-	 */
 	public abstract Object connect(ID remote, Object data, int timeout) throws ECFException;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.ecf.provider.comm.ISynchConnection#sendSynch(org.eclipse.ecf.core.identity.ID,
-	 *      byte[])
-	 */
 	public abstract Object sendSynch(ID target, byte[] data) throws IOException;
 
 	/**
@@ -89,16 +81,7 @@ public abstract class AbstractJMSChannel extends SocketAddress implements ISynch
 	 */
 	protected abstract ConnectionFactory createJMSConnectionFactory(JMSID targetID) throws IOException;
 
-	/**
-	 * Handle synchronous request messages
-	 * (ConnectRequestMessage/DisconnectRequestMessage)
-	 * 
-	 * @param omsg
-	 *            ObjectMessage that is the source of the request
-	 * @param o
-	 *            the ECFMessage that is the request message
-	 */
-	protected abstract void handleSynchRequest(ObjectMessage omsg, ECFMessage o);
+	protected abstract void handleSynchRequest(String jmsCorrelationID, ECFMessage ecfmsg);
 
 	protected void fireListenersConnect(ConnectionEvent event) {
 		List toNotify = null;
@@ -129,10 +112,6 @@ public abstract class AbstractJMSChannel extends SocketAddress implements ISynch
 	 */
 	public ID getLocalID() {
 		return localContainerID;
-	}
-
-	private static long getNextCorrelationID() {
-		return correlationID++;
 	}
 
 	protected boolean isActive() {
@@ -166,8 +145,8 @@ public abstract class AbstractJMSChannel extends SocketAddress implements ISynch
 				}
 			});
 			session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-			jmsTopic = new JmsTopic(session, targetID.getTopicOrQueueName());
-			jmsTopic.getConsumer().setMessageListener(new TopicReceiver());
+			jmsTopicSession = new JmsTopicSession(session, targetID.getTopicOrQueueName());
+			jmsTopicSession.getConsumer().setMessageListener(new TopicReceiver());
 			connected = true;
 			isStopping = false;
 			connection.start();
@@ -200,7 +179,7 @@ public abstract class AbstractJMSChannel extends SocketAddress implements ISynch
 		if (!isActive())
 			throw new ConnectException("Not connected"); //$NON-NLS-1$
 		try {
-			jmsTopic.getProducer().send(createObjectMessage(new JMSMessage(getConnectionID(), getLocalID(), recipient, obj)));
+			createAndSendMessage(new JMSMessage(getConnectionID(), getLocalID(), recipient, obj), null);
 		} catch (JMSException e) {
 			throwIOException("sendAsynch", "Exception in sendAsynch", e); //$NON-NLS-1$ //$NON-NLS-2$
 		}
@@ -280,7 +259,7 @@ public abstract class AbstractJMSChannel extends SocketAddress implements ISynch
 	 */
 	public void disconnect() {
 		Trace.entering(Activator.PLUGIN_ID, JmsDebugOptions.METHODS_ENTERING, this.getClass(), "disconnect"); //$NON-NLS-1$
-		synchronized (synch) {
+		synchronized (waitResponse) {
 			stop();
 			connected = false;
 			if (connection != null) {
@@ -291,7 +270,7 @@ public abstract class AbstractJMSChannel extends SocketAddress implements ISynch
 				}
 				connection = null;
 			}
-			synch.notifyAll();
+			waitResponse.notifyAll();
 		}
 		fireListenersDisconnect(new ConnectionEvent(this, null));
 		connectionListeners.clear();
@@ -316,85 +295,103 @@ public abstract class AbstractJMSChannel extends SocketAddress implements ISynch
 		started = true;
 	}
 
-	protected void handleTopicMessage(Message msg, JMSMessage jmsmsg) {
-		Trace.entering(Activator.PLUGIN_ID, JmsDebugOptions.METHODS_ENTERING, this.getClass(), "handleTopicMessage", new Object[] {msg, //$NON-NLS-1$
-				jmsmsg});
+	protected void handleTopicMessage(Object data) {
+		Trace.entering(Activator.PLUGIN_ID, JmsDebugOptions.METHODS_ENTERING, this.getClass(), "handleTopicMessage", new Object[] {data}); //$NON-NLS-1$
 		if (isActive()) {
 			try {
-				handler.handleAsynchEvent(new AsynchEvent(this, jmsmsg.getData()));
+				handler.handleAsynchEvent(new AsynchEvent(this, data));
 			} catch (IOException e) {
 				Trace.catching(Activator.PLUGIN_ID, JmsDebugOptions.EXCEPTIONS_CATCHING, this.getClass(), "handleTopicMessage", e); //$NON-NLS-1$
 				Activator.getDefault().log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, IStatus.ERROR, "Exception on handleTopicMessage", e)); //$NON-NLS-1$
 			}
 		} else
-			Trace.trace(Activator.PLUGIN_ID, "handleTopicMessage: channel not active...ignoring message " + msg + " with JMSMessage " + jmsmsg); //$NON-NLS-1$ //$NON-NLS-2$
+			Trace.trace(Activator.PLUGIN_ID, "handleTopicMessage: channel not active...ignoring message"); //$NON-NLS-1$
 		Trace.exiting(Activator.PLUGIN_ID, JmsDebugOptions.METHODS_EXITING, this.getClass(), "handleTopicMessage"); //$NON-NLS-1$
 	}
-
-	protected Object synch = new Object();
-
-	private String correlation = null;
-
-	private Serializable reply = null;
-
-	private boolean waitDone;
 
 	protected Serializable sendAndWait(Serializable obj) throws IOException {
 		return sendAndWait(obj, keepAlive);
 	}
 
-	protected ObjectMessage createObjectMessage(Serializable obj) throws JMSException {
-		return session.createObjectMessage(obj);
+	//	protected ObjectMessage createObjectMessage(Serializable obj) throws JMSException {
+	//		return session.createObjectMessage(obj);
+	//	}
+	//
+	//	protected void sendObjectMessage(ObjectMessage msg) throws JMSException {
+	//		jmsTopicSession.getProducer().send(msg);
+	//	}
+	//
+
+	protected Message createMessage(Serializable obj, String jmsCorrelationId) throws JMSException {
+		BytesMessage msg = session.createBytesMessage();
+		try {
+			msg.writeObject(SOContainer.serialize(obj));
+		} catch (IOException e) {
+			JMSException t = new JMSException("Could not serialized obj=" + obj); //$NON-NLS-1$
+			t.setStackTrace(e.getStackTrace());
+			throw t;
+		}
+		if (jmsCorrelationId != null)
+			msg.setJMSCorrelationID(jmsCorrelationId);
+		return msg;
+	}
+
+	protected void sendMessage(Message message) throws JMSException {
+		jmsTopicSession.getProducer().send(message);
+	}
+
+	protected void createAndSendMessage(Serializable object, String jmsCorrelationId) throws JMSException {
+		sendMessage(createMessage(object, jmsCorrelationId));
+	}
+
+	protected void updateCorrelation() {
+		this.correlation = String.valueOf(correlationID++);
+	}
+
+	protected String getCorrelation() {
+		return this.correlation;
+	}
+
+	protected void resetCorrelation() {
+		this.correlation = null;
+	}
+
+	protected void setReply(Serializable reply) {
+		this.reply = reply;
+	}
+
+	protected void waitForReply(long waitDuration) throws IOException {
+		long waittimeout = System.currentTimeMillis() + waitDuration;
+		while (!waitDone && (waittimeout - System.currentTimeMillis() > 0)) {
+			try {
+				waitResponse.wait(waitDuration / 10);
+			} catch (InterruptedException e) {
+				traceAndLogExceptionCatch(IStatus.ERROR, "handleTopicMessage", e); //$NON-NLS-1$
+				return;
+			}
+		}
+		waitDone = true;
+		if (reply == null)
+			throw new IOException("timeout waiting for response"); //$NON-NLS-1$
 	}
 
 	protected Serializable sendAndWait(Serializable obj, int waitDuration) throws IOException {
 		Trace.entering(Activator.PLUGIN_ID, JmsDebugOptions.METHODS_ENTERING, this.getClass(), "sendAndWait", new Object[] {obj, //$NON-NLS-1$
 				new Integer(waitDuration)});
-		synchronized (synch) {
+		synchronized (waitResponse) {
 			try {
-				ObjectMessage msg = createObjectMessage(obj);
-				correlation = String.valueOf(getNextCorrelationID());
-				msg.setJMSCorrelationID(correlation);
-				waitDone = false;
-				long waittimeout = System.currentTimeMillis() + waitDuration;
-				reply = null;
-				jmsTopic.getProducer().send(msg);
-				while (!waitDone && (waittimeout - System.currentTimeMillis() > 0)) {
-					synch.wait(waitDuration / 10);
-				}
-				waitDone = true;
-				if (reply == null)
-					throw new IOException("timeout waiting for response"); //$NON-NLS-1$
+				setReply(null);
+				updateCorrelation();
+				createAndSendMessage(obj, correlation);
+				waitForReply(waitDuration);
 			} catch (JMSException e) {
 				Trace.catching(Activator.PLUGIN_ID, JmsDebugOptions.EXCEPTIONS_CATCHING, this.getClass(), "sendAndWait", e); //$NON-NLS-1$
 				throwIOException("sendAndWait", "JMSException in sendAndWait", //$NON-NLS-1$ //$NON-NLS-2$
 						e);
-			} catch (InterruptedException e) {
-				traceAndLogExceptionCatch(IStatus.ERROR, "handleTopicMessage", e); //$NON-NLS-1$
 			}
 			Trace.exiting(Activator.PLUGIN_ID, JmsDebugOptions.METHODS_EXITING, this.getClass(), "sendAndWait", reply); //$NON-NLS-1$
 			return reply;
 		}
-	}
-
-	protected void handleSynchResponse(ObjectMessage msg, ECFMessage ecfmsg) {
-		Trace.entering(Activator.PLUGIN_ID, JmsDebugOptions.METHODS_ENTERING, this.getClass(), "handleSynchMessage", new Object[] {msg, //$NON-NLS-1$
-				ecfmsg});
-		synchronized (synch) {
-			if (correlation == null)
-				return;
-			try {
-				if (correlation.equals(msg.getJMSCorrelationID())) {
-					reply = msg.getObject();
-					waitDone = true;
-					correlation = null;
-					synch.notify();
-				}
-			} catch (JMSException e) {
-				traceAndLogExceptionCatch(IStatus.ERROR, "handleSynchMessage", e); //$NON-NLS-1$
-			}
-		}
-		Trace.exiting(Activator.PLUGIN_ID, JmsDebugOptions.METHODS_EXITING, this.getClass(), "handleSynchMessage"); //$NON-NLS-1$
 	}
 
 	protected void traceAndLogExceptionCatch(int code, String method, Throwable e) {
@@ -415,6 +412,11 @@ public abstract class AbstractJMSChannel extends SocketAddress implements ISynch
 		}
 	}
 
+	static Object readObject(byte[] bytes) throws IOException, ClassNotFoundException {
+		ObjectInputStream oos = new ObjectInputStream(new ByteArrayInputStream(bytes));
+		return oos.readObject();
+	}
+
 	protected final class TopicReceiver implements MessageListener {
 
 		public TopicReceiver() {
@@ -424,9 +426,11 @@ public abstract class AbstractJMSChannel extends SocketAddress implements ISynch
 		public void onMessage(Message msg) {
 			try {
 				// All messages should be ObjectMessages
-				if (msg instanceof ObjectMessage) {
-					ObjectMessage omg = (ObjectMessage) msg;
-					Object o = omg.getObject();
+				if (msg instanceof BytesMessage) {
+					BytesMessage bm = (BytesMessage) msg;
+					byte[] bytes = new byte[(int) bm.getBodyLength()];
+					bm.readBytes(bytes);
+					Object o = readObject(bytes);
 					// All messages should also be ECFMessages
 					if (o instanceof ECFMessage) {
 						ECFMessage ecfmsg = (ECFMessage) o;
@@ -444,22 +448,28 @@ public abstract class AbstractJMSChannel extends SocketAddress implements ISynch
 						ID targetID = ecfmsg.getTargetID();
 						if (targetID == null) {
 							if (ecfmsg instanceof JMSMessage)
-								handleTopicMessage(msg, (JMSMessage) ecfmsg);
+								handleTopicMessage(((JMSMessage) ecfmsg).getData());
 							else
 								Trace.trace(Activator.PLUGIN_ID, "onMessage.received invalid message to group"); //$NON-NLS-1$
-						} else {
-							if (targetID.equals(getLocalID())) {
-								if (ecfmsg instanceof JMSMessage)
-									handleTopicMessage(msg, (JMSMessage) ecfmsg);
-								else if (ecfmsg instanceof SynchRequestMessage)
-									handleSynchRequest(omg, ecfmsg);
-								else if (ecfmsg instanceof SynchResponseMessage)
-									handleSynchResponse(omg, ecfmsg);
-								else
-									Trace.trace(Activator.PLUGIN_ID, "onMessage.msg invalid message to " + targetID); //$NON-NLS-1$
+						} else if (targetID.equals(getLocalID())) {
+							if (ecfmsg instanceof JMSMessage)
+								handleTopicMessage(((JMSMessage) ecfmsg).getData());
+							else if (ecfmsg instanceof SynchRequestMessage)
+								handleSynchRequest(bm.getJMSCorrelationID(), ecfmsg);
+							else if (ecfmsg instanceof SynchResponseMessage) {
+								synchronized (waitResponse) {
+									String c = getCorrelation();
+									if (c == null || c.equals(bm.getJMSCorrelationID())) {
+										setReply(ecfmsg);
+										waitDone = true;
+										resetCorrelation();
+										waitResponse.notify();
+									}
+								}
 							} else
-								Trace.trace(Activator.PLUGIN_ID, "onMessage.msg ECFMessage " + ecfmsg + " not intended for " + targetID); //$NON-NLS-1$ //$NON-NLS-2$
-						}
+								Trace.trace(Activator.PLUGIN_ID, "onMessage.msg invalid message to " + targetID); //$NON-NLS-1$
+						} else
+							Trace.trace(Activator.PLUGIN_ID, "onMessage.msg ECFMessage " + ecfmsg + " not intended for " + targetID); //$NON-NLS-1$ //$NON-NLS-2$
 					} else
 						// received bogus message...ignore
 						Trace.trace(Activator.PLUGIN_ID, "onMessage: received non-ECFMessage...ignoring " + o); //$NON-NLS-1$

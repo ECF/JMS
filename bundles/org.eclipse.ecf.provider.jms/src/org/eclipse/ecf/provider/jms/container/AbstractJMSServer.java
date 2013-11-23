@@ -14,8 +14,6 @@ package org.eclipse.ecf.provider.jms.container;
 import java.io.*;
 import java.net.ConnectException;
 import java.net.SocketAddress;
-import javax.jms.JMSException;
-import javax.jms.ObjectMessage;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.ecf.core.ContainerConnectException;
@@ -87,17 +85,13 @@ public abstract class AbstractJMSServer extends ServerSOContainer {
 		if (data == null)
 			return null;
 		// See AbstractJMSServerChannel, line 222
-		ObjectMessage omsg = (ObjectMessage) data[0];
+		String jmsCorrelationId = (String) data[0];
 		ECFMessage req = (ECFMessage) data[1];
 		if (req instanceof ConnectRequestMessage) {
-			handleConnectRequest(omsg, (ConnectRequestMessage) req, (AbstractJMSServerChannel) e.getConnection());
+			handleConnectRequest(jmsCorrelationId, (ConnectRequestMessage) req, (AbstractJMSServerChannel) e.getConnection());
 		} else if (req instanceof DisconnectRequestMessage) {
 			final DisconnectRequestMessage dcm = (DisconnectRequestMessage) req;
-			try {
-				handleDisconnectRequest(omsg.getJMSCorrelationID(), dcm.getTargetID(), dcm.getSenderID());
-			} catch (JMSException e1) {
-				traceAndLogExceptionCatch(IStatus.ERROR, "processSynch", e1); //$NON-NLS-1$
-			}
+			handleDisconnectRequest(jmsCorrelationId, dcm.getTargetID(), dcm.getSenderID());
 		}
 		return null;
 	}
@@ -125,7 +119,7 @@ public abstract class AbstractJMSServer extends ServerSOContainer {
 		return null;
 	}
 
-	protected Serializable handleConnectRequest(ObjectMessage omsg, ConnectRequestMessage request, AbstractJMSServerChannel channel) {
+	protected Serializable handleConnectRequest(String jmsCorrelationID, ConnectRequestMessage request, AbstractJMSServerChannel channel) {
 		Trace.entering(Activator.PLUGIN_ID, JmsDebugOptions.METHODS_ENTERING, this.getClass(), "handleConnectRequest", new Object[] { //$NON-NLS-1$
 				request, channel});
 		try {
@@ -156,7 +150,7 @@ public abstract class AbstractJMSServer extends ServerSOContainer {
 					// Notify existing remotes about new member
 					messages[1] = serialize(ContainerMessage.createViewChangeMessage(localID, null, getNextSequenceNumber(), new ID[] {remoteID}, true, null));
 					// send connect response
-					newclient.handleConnect(omsg.getJMSCorrelationID(), request.getTargetID(), request.getSenderID(), messages);
+					newclient.handleConnect(jmsCorrelationID, request.getTargetID(), request.getSenderID(), messages);
 				} else
 					throw new ConnectException("Connection refused by server"); //$NON-NLS-1$
 			}

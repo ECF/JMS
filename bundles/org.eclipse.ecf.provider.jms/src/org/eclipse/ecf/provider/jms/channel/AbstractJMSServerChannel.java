@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
 import javax.jms.JMSException;
-import javax.jms.ObjectMessage;
 import org.eclipse.ecf.core.identity.ID;
 import org.eclipse.ecf.core.util.ECFException;
 import org.eclipse.ecf.core.util.Trace;
@@ -31,10 +30,7 @@ public abstract class AbstractJMSServerChannel extends AbstractJMSChannel implem
 
 	public AbstractJMSServerChannel(ISynchAsynchEventHandler handler, int keepAlive) throws ECFException {
 		super(handler, keepAlive);
-		if (localContainerID instanceof JMSID) {
-			setupJMS((JMSID) localContainerID, null);
-		} else
-			throw new ECFException("localContainerID must be of type JMSID"); //$NON-NLS-1$
+		setupJMS((JMSID) localContainerID, null);
 	}
 
 	/*
@@ -89,7 +85,7 @@ public abstract class AbstractJMSServerChannel extends AbstractJMSChannel implem
 		}
 
 		public void disconnect() {
-			synchronized (synch) {
+			synchronized (waitResponse) {
 				stop();
 			}
 		}
@@ -111,7 +107,7 @@ public abstract class AbstractJMSServerChannel extends AbstractJMSChannel implem
 		}
 
 		public void removeListener(IConnectionListener listener) {
-			// XXX not implemented
+			// nothing
 		}
 
 		public void start() {
@@ -196,9 +192,7 @@ public abstract class AbstractJMSServerChannel extends AbstractJMSChannel implem
 				Client.this.notifyAll();
 			}
 			try {
-				final ObjectMessage msg = createObjectMessage(new DisconnectResponseMessage(getConnectionID(), targetID, senderID, null));
-				msg.setJMSCorrelationID(jmsCorrelationID);
-				jmsTopic.getProducer().send(msg);
+				createAndSendMessage(new DisconnectResponseMessage(getConnectionID(), targetID, senderID, null), jmsCorrelationID);
 			} catch (JMSException e) {
 				traceAndLogExceptionCatch(RESPOND_TO_REQUEST_ERROR_CODE, "handleDisconnect", e); //$NON-NLS-1$
 			}
@@ -218,12 +212,10 @@ public abstract class AbstractJMSServerChannel extends AbstractJMSChannel implem
 		}
 
 		public void handleConnect(String jmsCorrelationID, ID targetID, ID senderID, Serializable[] messages) throws JMSException {
-			final ObjectMessage first = createObjectMessage(new ConnectResponseMessage(getConnectionID(), targetID, senderID, (messages == null) ? null : messages[0]));
-			first.setJMSCorrelationID(jmsCorrelationID);
 			// send connect response back to client, with jmsCorrelationID set appropriately
-			jmsTopic.getProducer().send(first);
+			createAndSendMessage(new ConnectResponseMessage(getConnectionID(), targetID, senderID, (messages == null) ? null : messages[0]), jmsCorrelationID);
 			// send group membership update to everyone else
-			jmsTopic.getProducer().send(createObjectMessage(new JMSMessage(getConnectionID(), getLocalID(), null, (messages == null) ? null : messages[1])));
+			createAndSendMessage(new JMSMessage(getConnectionID(), getLocalID(), null, (messages == null) ? null : messages[1]), null);
 		}
 
 	}
@@ -234,10 +226,10 @@ public abstract class AbstractJMSServerChannel extends AbstractJMSChannel implem
 		return newclient;
 	}
 
-	protected void handleSynchRequest(ObjectMessage omsg, ECFMessage o) {
-		Trace.entering(Activator.PLUGIN_ID, JmsDebugOptions.METHODS_ENTERING, this.getClass(), "handleSynchRequest", new Object[] {omsg, o}); //$NON-NLS-1$
+	protected void handleSynchRequest(String jmsCorrelationID, ECFMessage o) {
+		Trace.entering(Activator.PLUGIN_ID, JmsDebugOptions.METHODS_ENTERING, this.getClass(), "handleSynchRequest", new Object[] {o}); //$NON-NLS-1$
 		try {
-			handler.handleSynchEvent(new SynchEvent(this, new Object[] {omsg, o}));
+			handler.handleSynchEvent(new SynchEvent(this, new Object[] {jmsCorrelationID, o}));
 		} catch (final IOException e) {
 			traceAndLogExceptionCatch(RESPOND_TO_REQUEST_ERROR_CODE, "handleSynchRequest", e); //$NON-NLS-1$
 		}
