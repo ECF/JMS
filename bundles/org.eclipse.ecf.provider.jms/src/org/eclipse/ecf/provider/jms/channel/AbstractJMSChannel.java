@@ -66,19 +66,6 @@ public abstract class AbstractJMSChannel extends SocketAddress implements ISynch
 
 	public abstract Object sendSynch(ID target, byte[] data) throws IOException;
 
-	/**
-	 * Create a JMS ConnectionFactory instance for a given targetID with given
-	 * data. Implementers of this method must return a non-<code>null</code>
-	 * ConnectionFactory instance or throw an IOException. They cannot return
-	 * <code>null</code>.
-	 * 
-	 * @param targetID
-	 *            the JMSID for the target host.
-	 * @return ConnectionFactory instance. Must not be <code>null</code>.
-	 * @throws IOException
-	 *             if the connection factory cannot be made for the given
-	 *             target.
-	 */
 	protected abstract ConnectionFactory createJMSConnectionFactory(JMSID targetID) throws IOException;
 
 	protected abstract void handleSynchRequest(String jmsCorrelationID, ECFMessage ecfmsg);
@@ -164,12 +151,6 @@ public abstract class AbstractJMSChannel extends SocketAddress implements ISynch
 		sendAsync(recipient, (Serializable) obj);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.ecf.provider.comm.IAsynchConnection#sendAsynch(org.eclipse.ecf.core.identity.ID,
-	 *      byte[])
-	 */
 	public void sendAsynch(ID recipient, byte[] obj) throws IOException {
 		sendAsync(recipient, obj);
 	}
@@ -313,15 +294,6 @@ public abstract class AbstractJMSChannel extends SocketAddress implements ISynch
 		return sendAndWait(obj, keepAlive);
 	}
 
-	//	protected ObjectMessage createObjectMessage(Serializable obj) throws JMSException {
-	//		return session.createObjectMessage(obj);
-	//	}
-	//
-	//	protected void sendObjectMessage(ObjectMessage msg) throws JMSException {
-	//		jmsTopicSession.getProducer().send(msg);
-	//	}
-	//
-
 	protected Message createMessage(Serializable obj, String jmsCorrelationId) throws JMSException {
 		BytesMessage msg = session.createBytesMessage();
 		try {
@@ -412,9 +384,60 @@ public abstract class AbstractJMSChannel extends SocketAddress implements ISynch
 		}
 	}
 
-	static Object readObject(byte[] bytes) throws IOException, ClassNotFoundException {
+	protected static Object readObject(byte[] bytes) throws IOException, ClassNotFoundException {
 		ObjectInputStream oos = new ObjectInputStream(new ByteArrayInputStream(bytes));
 		return oos.readObject();
+	}
+
+	protected void handleMessage(byte[] bytes, String correlationId) {
+		try {
+			Object o = readObject(bytes);
+			// All messages should also be ECFMessages
+			if (o instanceof ECFMessage) {
+				ECFMessage ecfmsg = (ECFMessage) o;
+				ID fromID = ecfmsg.getSenderID();
+				if (fromID == null) {
+					Trace.exiting(Activator.PLUGIN_ID, JmsDebugOptions.METHODS_ENTERING, this.getClass(), "onMessage: fromID=null...ignoring ECFMessage " + ecfmsg); //$NON-NLS-1$
+					return;
+				}
+				if (fromID.equals(getLocalID())) {
+					Trace.exiting(Activator.PLUGIN_ID, JmsDebugOptions.METHODS_ENTERING, this.getClass(), "onMessage:  fromID=localID...ignoring ECFMessage " + ecfmsg); //$NON-NLS-1$
+					return;
+				}
+				// Get targetID...it's either null, and the message is intended for everyone, or it's 
+				// non-null and it equals our ID and is meant for us.  Anything else and it's not meant for us
+				ID targetID = ecfmsg.getTargetID();
+				if (targetID == null) {
+					if (ecfmsg instanceof JMSMessage)
+						handleTopicMessage(((JMSMessage) ecfmsg).getData());
+					else
+						Trace.trace(Activator.PLUGIN_ID, "onMessage.received invalid message to group"); //$NON-NLS-1$
+				} else if (targetID.equals(getLocalID())) {
+					if (ecfmsg instanceof JMSMessage)
+						handleTopicMessage(((JMSMessage) ecfmsg).getData());
+					else if (ecfmsg instanceof SynchRequestMessage)
+						handleSynchRequest(correlationId, ecfmsg);
+					else if (ecfmsg instanceof SynchResponseMessage) {
+						synchronized (waitResponse) {
+							String c = getCorrelation();
+							if (c == null || c.equals(correlationId)) {
+								setReply(ecfmsg);
+								waitDone = true;
+								resetCorrelation();
+								waitResponse.notify();
+							}
+						}
+					} else
+						Trace.trace(Activator.PLUGIN_ID, "onMessage.msg invalid message to " + targetID); //$NON-NLS-1$
+				} else
+					Trace.trace(Activator.PLUGIN_ID, "onMessage.msg ECFMessage " + ecfmsg + " not intended for " + targetID); //$NON-NLS-1$ //$NON-NLS-2$
+			} else
+				// received bogus message...ignore
+				Trace.trace(Activator.PLUGIN_ID, "onMessage: received non-ECFMessage...ignoring " + o); //$NON-NLS-1$
+		} catch (Exception e) {
+			traceAndLogExceptionCatch(IStatus.ERROR, "onMessage: Unexpected Exception", e); //$NON-NLS-1$
+		}
+
 	}
 
 	protected final class TopicReceiver implements MessageListener {
@@ -424,60 +447,20 @@ public abstract class AbstractJMSChannel extends SocketAddress implements ISynch
 		}
 
 		public void onMessage(Message msg) {
-			try {
-				// All messages should be ObjectMessages
-				if (msg instanceof BytesMessage) {
-					BytesMessage bm = (BytesMessage) msg;
-					byte[] bytes = new byte[(int) bm.getBodyLength()];
+			if (msg instanceof BytesMessage) {
+				BytesMessage bm = (BytesMessage) msg;
+				byte[] bytes = null;
+				String correlationId = null;
+				try {
+					bytes = new byte[(int) bm.getBodyLength()];
 					bm.readBytes(bytes);
-					Object o = readObject(bytes);
-					// All messages should also be ECFMessages
-					if (o instanceof ECFMessage) {
-						ECFMessage ecfmsg = (ECFMessage) o;
-						ID fromID = ecfmsg.getSenderID();
-						if (fromID == null) {
-							Trace.exiting(Activator.PLUGIN_ID, JmsDebugOptions.METHODS_ENTERING, this.getClass(), "onMessage: fromID=null...ignoring ECFMessage " + ecfmsg); //$NON-NLS-1$
-							return;
-						}
-						if (fromID.equals(getLocalID())) {
-							Trace.exiting(Activator.PLUGIN_ID, JmsDebugOptions.METHODS_ENTERING, this.getClass(), "onMessage:  fromID=localID...ignoring ECFMessage " + ecfmsg); //$NON-NLS-1$
-							return;
-						}
-						// Get targetID...it's either null, and the message is intended for everyone, or it's 
-						// non-null and it equals our ID and is meant for us.  Anything else and it's not meant for us
-						ID targetID = ecfmsg.getTargetID();
-						if (targetID == null) {
-							if (ecfmsg instanceof JMSMessage)
-								handleTopicMessage(((JMSMessage) ecfmsg).getData());
-							else
-								Trace.trace(Activator.PLUGIN_ID, "onMessage.received invalid message to group"); //$NON-NLS-1$
-						} else if (targetID.equals(getLocalID())) {
-							if (ecfmsg instanceof JMSMessage)
-								handleTopicMessage(((JMSMessage) ecfmsg).getData());
-							else if (ecfmsg instanceof SynchRequestMessage)
-								handleSynchRequest(bm.getJMSCorrelationID(), ecfmsg);
-							else if (ecfmsg instanceof SynchResponseMessage) {
-								synchronized (waitResponse) {
-									String c = getCorrelation();
-									if (c == null || c.equals(bm.getJMSCorrelationID())) {
-										setReply(ecfmsg);
-										waitDone = true;
-										resetCorrelation();
-										waitResponse.notify();
-									}
-								}
-							} else
-								Trace.trace(Activator.PLUGIN_ID, "onMessage.msg invalid message to " + targetID); //$NON-NLS-1$
-						} else
-							Trace.trace(Activator.PLUGIN_ID, "onMessage.msg ECFMessage " + ecfmsg + " not intended for " + targetID); //$NON-NLS-1$ //$NON-NLS-2$
-					} else
-						// received bogus message...ignore
-						Trace.trace(Activator.PLUGIN_ID, "onMessage: received non-ECFMessage...ignoring " + o); //$NON-NLS-1$
-				} else
-					Trace.trace(Activator.PLUGIN_ID, "onMessage: received non-object message...ignoring " + msg); //$NON-NLS-1$
-			} catch (Exception e) {
-				traceAndLogExceptionCatch(IStatus.ERROR, "onMessage: Unexpected Exception", e); //$NON-NLS-1$
-			}
+					correlationId = bm.getJMSCorrelationID();
+				} catch (JMSException e) {
+					traceAndLogExceptionCatch(IStatus.ERROR, "onMessage: Unexpected Exception", e); //$NON-NLS-1$
+				}
+				handleMessage(bytes, correlationId);
+			} else
+				Trace.trace(Activator.PLUGIN_ID, "onMessage: received non-bytes message...ignoring " + msg); //$NON-NLS-1$
 		}
 	}
 }

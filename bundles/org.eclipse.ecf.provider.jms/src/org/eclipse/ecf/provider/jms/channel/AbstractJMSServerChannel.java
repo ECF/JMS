@@ -18,7 +18,6 @@ import org.eclipse.ecf.core.util.Trace;
 import org.eclipse.ecf.internal.provider.jms.Activator;
 import org.eclipse.ecf.internal.provider.jms.JmsDebugOptions;
 import org.eclipse.ecf.provider.comm.*;
-import org.eclipse.ecf.provider.jms.identity.JMSID;
 
 /**
  * Abstract JMS server channel.
@@ -28,17 +27,10 @@ public abstract class AbstractJMSServerChannel extends AbstractJMSChannel implem
 
 	private static final int RESPOND_TO_REQUEST_ERROR_CODE = 33001;
 
-	public AbstractJMSServerChannel(ISynchAsynchEventHandler handler, int keepAlive) throws ECFException {
+	public AbstractJMSServerChannel(ISynchAsynchEventHandler handler, int keepAlive) {
 		super(handler, keepAlive);
-		setupJMS((JMSID) localContainerID, null);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.ecf.provider.jms.channel.AbstractJMSChannel#connect(org.eclipse.ecf.core.identity.ID,
-	 *      java.lang.Object, int)
-	 */
 	public Object connect(ID remote, Object data, int timeout) throws ECFException {
 		throw new ECFException("Server container cannot connect"); //$NON-NLS-1$
 	}
@@ -77,7 +69,7 @@ public abstract class AbstractJMSServerChannel extends AbstractJMSChannel implem
 		}
 
 		public void addListener(IConnectionListener listener) {
-			// XXX not implemented
+			// 
 		}
 
 		public Object connect(ID remote, Object data, int timeout) throws ECFException {

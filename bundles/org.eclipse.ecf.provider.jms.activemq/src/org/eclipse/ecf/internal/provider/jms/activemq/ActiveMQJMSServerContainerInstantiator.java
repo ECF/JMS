@@ -32,10 +32,6 @@ public class ActiveMQJMSServerContainerInstantiator extends
 
 	public static final String ID_PARAM = "id";
 
-	public ActiveMQJMSServerContainerInstantiator() {
-
-	}
-
 	private JMSID getJMSIDFromParameter(Object p) {
 		if (p instanceof String) {
 			return (JMSID) IDFactory.getDefault().createID(JMSNamespace.NAME,

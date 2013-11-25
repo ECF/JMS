@@ -25,17 +25,6 @@ public class ActiveMQJMSClientContainerInstantiator extends
 	protected static final String[] jmsIntents = { "JMS" };
 	protected static final String JMS_CLIENT_NAME = "ecf.jms.activemq.tcp.client";
 
-	public ActiveMQJMSClientContainerInstantiator() {
-
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.eclipse.ecf.core.provider.IContainerInstantiator#createInstance(org
-	 * .eclipse.ecf.core.ContainerTypeDescription, java.lang.Object[])
-	 */
 	public IContainer createInstance(ContainerTypeDescription description,
 			Object[] args) throws ContainerCreateException {
 		try {

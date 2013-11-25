@@ -25,6 +25,7 @@ public class ActiveMQServerChannel extends AbstractJMSServerChannel {
 		super(handler, keepAlive);
 		this.username = username;
 		this.password = pw;
+		setupJMS((JMSID) localContainerID, null);
 	}
 
 	protected ConnectionFactory createJMSConnectionFactory(JMSID targetID)
