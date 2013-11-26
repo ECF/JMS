@@ -8,7 +8,8 @@
  ******************************************************************************/
 package org.eclipse.ecf.provider.jms.channel;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.Serializable;
 import java.net.ConnectException;
 import java.net.SocketAddress;
 import java.util.*;
@@ -374,6 +375,8 @@ public abstract class AbstractJMSChannel extends SocketAddress implements ISynch
 	protected String getConnectionID() {
 		String res = null;
 		try {
+			if (connection == null)
+				return getLocalID().getName();
 			res = connection.getClientID();
 			if (res == null)
 				res = getLocalID().getName();
@@ -384,10 +387,7 @@ public abstract class AbstractJMSChannel extends SocketAddress implements ISynch
 		}
 	}
 
-	protected static Object readObject(byte[] bytes) throws IOException, ClassNotFoundException {
-		ObjectInputStream oos = new ObjectInputStream(new ByteArrayInputStream(bytes));
-		return oos.readObject();
-	}
+	protected abstract Object readObject(byte[] bytes) throws IOException, ClassNotFoundException;
 
 	protected void handleMessage(byte[] bytes, String correlationId) {
 		try {

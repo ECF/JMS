@@ -8,7 +8,9 @@
  ******************************************************************************/
 package org.eclipse.ecf.provider.jms.activemq.container;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 
 import javax.jms.ConnectionFactory;
 
@@ -35,6 +37,11 @@ public class ActiveMQJMSClientContainer extends AbstractJMSClient {
 
 		public ActiveMQClientChannel() {
 			super(getReceiver(), getKeepAlive());
+		}
+
+		protected Object readObject(byte[] bytes) throws IOException, ClassNotFoundException {
+			ObjectInputStream oos = new ObjectInputStream(new ByteArrayInputStream(bytes));
+			return oos.readObject();
 		}
 
 		protected ConnectionFactory createJMSConnectionFactory(JMSID targetID)

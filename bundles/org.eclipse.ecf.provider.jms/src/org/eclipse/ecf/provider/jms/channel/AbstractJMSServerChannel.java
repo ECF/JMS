@@ -42,13 +42,14 @@ public abstract class AbstractJMSServerChannel extends AbstractJMSChannel implem
 		private final Map properties;
 		private final ID clientID;
 		boolean isStarted = false;
-		private final Object disconnectLock = new Object();
+		final Object disconnectLock = new Object();
 		boolean disconnectHandled = false;
 
 		private Thread pingThread = null;
 		private final int pingWaitTime = DEFAULT_PING_WAITTIME;
 
 		private long lastSendTime = -1;
+		private boolean usePing = false;
 
 		protected long getLastSendTime() {
 			return lastSendTime;
@@ -59,8 +60,13 @@ public abstract class AbstractJMSServerChannel extends AbstractJMSChannel implem
 		}
 
 		public Client(ID clientID) {
+			this(clientID, true);
+		}
+
+		public Client(ID clientID, boolean usePing) {
 			this.clientID = clientID;
 			this.properties = new HashMap();
+			this.usePing = usePing;
 		}
 
 		public void sendAsynch(ID receiver, byte[] data) throws IOException {
@@ -105,9 +111,11 @@ public abstract class AbstractJMSServerChannel extends AbstractJMSChannel implem
 		public void start() {
 			if (!isStarted) {
 				isStarted = true;
-				pingThread = setupPing();
-				pingThread.setDaemon(true);
-				pingThread.start();
+				if (usePing) {
+					pingThread = setupPing();
+					pingThread.setDaemon(true);
+					pingThread.start();
+				}
 			}
 		}
 
