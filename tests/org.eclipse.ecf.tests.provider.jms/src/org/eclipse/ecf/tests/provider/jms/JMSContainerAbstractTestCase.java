@@ -5,7 +5,8 @@ import org.eclipse.ecf.core.identity.ID;
 import org.eclipse.ecf.core.identity.IDFactory;
 import org.eclipse.ecf.tests.ContainerAbstractTestCase;
 
-public abstract class JMSContainerAbstractTestCase extends ContainerAbstractTestCase {
+public abstract class JMSContainerAbstractTestCase extends
+		ContainerAbstractTestCase {
 
 	protected abstract String getClientContainerName();
 
@@ -24,18 +25,19 @@ public abstract class JMSContainerAbstractTestCase extends ContainerAbstractTest
 		super.setUp();
 	}
 
-	private void setupBroker() throws Exception {
+	protected void setupBroker() throws Exception {
 		broker = new BrokerUtil(getContainerManager());
 	}
 
 	private BrokerUtil broker;
-	
-	private void tearDownBroker() throws Exception {
+
+	protected void tearDownBroker() throws Exception {
 		if (broker != null) {
 			broker.dispose();
 			broker = null;
 		}
 	}
+
 	protected void tearDown() throws Exception {
 		cleanUpServerAndClients();
 		tearDownBroker();
@@ -44,7 +46,9 @@ public abstract class JMSContainerAbstractTestCase extends ContainerAbstractTest
 
 	public void testConnectClient() throws Exception {
 		final IContainer client = getClients()[0];
-		final ID targetID = IDFactory.getDefault().createID(client.getConnectNamespace(), new Object[] {getServerIdentity()});
+		final ID targetID = IDFactory.getDefault().createID(
+				client.getConnectNamespace(),
+				new Object[] { getServerIdentity() });
 		client.connect(targetID, null);
 		Thread.sleep(3000);
 	}

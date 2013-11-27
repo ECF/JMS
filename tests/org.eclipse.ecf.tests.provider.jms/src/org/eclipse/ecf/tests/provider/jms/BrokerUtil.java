@@ -9,13 +9,15 @@ public class BrokerUtil {
 
 	private IContainerManager containerManager;
 	private IContainer brokerContainer;
-	
-	public BrokerUtil(IContainerManager containerManager) throws ContainerCreateException, ContainerConnectException {
+
+	public BrokerUtil(IContainerManager containerManager)
+			throws ContainerCreateException, ContainerConnectException {
 		this.containerManager = containerManager;
-		brokerContainer = containerManager.getContainerFactory().createContainer("ecf.jms.activemq.broker");
-		brokerContainer.connect(null,null);
+		brokerContainer = containerManager.getContainerFactory()
+				.createContainer("ecf.jms.activemq.broker");
+		brokerContainer.connect(null, null);
 	}
-	
+
 	public void dispose() {
 		if (this.brokerContainer != null) {
 			brokerContainer.disconnect();

@@ -12,15 +12,21 @@ public class ActiveMQJMSContainerTest extends JMSContainerAbstractTestCase {
 		return ActiveMQ.CLIENT_CONTAINER_NAME;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ecf.tests.provider.jms.JMSContainerAbstractTestCase#getServerContainerName()
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.ecf.tests.provider.jms.JMSContainerAbstractTestCase#
+	 * getServerContainerName()
 	 */
 	protected String getServerContainerName() {
 		return ActiveMQ.SERVER_CONTAINER_NAME;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ecf.tests.provider.jms.JMSContainerAbstractTestCase#getServerIdentity()
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.ecf.tests.provider.jms.JMSContainerAbstractTestCase#
+	 * getServerIdentity()
 	 */
 	protected String getServerIdentity() {
 		return ActiveMQ.TARGET_NAME;
@@ -33,7 +39,9 @@ public class ActiveMQJMSContainerTest extends JMSContainerAbstractTestCase {
 
 	public void testConnectClient() throws Exception {
 		IContainer client = getClients()[0];
-		ID targetID = IDFactory.getDefault().createID(client.getConnectNamespace(),new Object [] { getServerIdentity() });
+		ID targetID = IDFactory.getDefault().createID(
+				client.getConnectNamespace(),
+				new Object[] { getServerIdentity() });
 		Thread.sleep(3000);
 		client.connect(targetID, null);
 		Thread.sleep(3000);

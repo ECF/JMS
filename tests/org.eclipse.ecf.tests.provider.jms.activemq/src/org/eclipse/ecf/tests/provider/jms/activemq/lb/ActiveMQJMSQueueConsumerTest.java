@@ -5,10 +5,13 @@ import org.eclipse.ecf.core.ContainerFactory;
 import org.eclipse.ecf.core.IContainer;
 import org.eclipse.ecf.tests.ContainerAbstractTestCase;
 
-public abstract class ActiveMQJMSQueueConsumerTest extends ContainerAbstractTestCase {
+public abstract class ActiveMQJMSQueueConsumerTest extends
+		ContainerAbstractTestCase {
 
 	public void testConnectConsumer() throws Exception {
-		IContainer container = ContainerFactory.getDefault().createContainer(ActiveMQLB.QUEUE_CONSUMER_CONTAINER_NAME, new Object[] { ActiveMQLB.QUEUE_NAME });
+		IContainer container = ContainerFactory.getDefault().createContainer(
+				ActiveMQLB.QUEUE_CONSUMER_CONTAINER_NAME,
+				new Object[] { ActiveMQLB.QUEUE_NAME });
 		Assert.isNotNull(container);
 		container.dispose();
 	}
