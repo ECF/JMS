@@ -37,19 +37,19 @@ public abstract class AbstractJMSClientChannel extends AbstractJMSChannel implem
 	 *      java.lang.Object, int)
 	 */
 	public Object connect(ID target, Object data, int timeout) throws ECFException {
-		synchronized (waitResponse) {
-			Trace.entering(Activator.PLUGIN_ID, JmsDebugOptions.METHODS_ENTERING, this.getClass(), "connect", new Object[] {target, data, //$NON-NLS-1$
-					new Integer(timeout)});
-			if (isConnected())
-				throw new ContainerConnectException("Already connected"); //$NON-NLS-1$
-			if (target == null)
-				throw new ContainerConnectException("target must not be null"); //$NON-NLS-1$
-			if (!(target instanceof JMSID))
-				throw new ContainerConnectException("target must be of type JMSID"); //$NON-NLS-1$
-			if (!(data instanceof Serializable))
-				throw new ContainerConnectException("data for connect to target=" + target + " is not serializable", new NotSerializableException()); //$NON-NLS-1$//$NON-NLS-2$
+		Trace.entering(Activator.PLUGIN_ID, JmsDebugOptions.METHODS_ENTERING, this.getClass(), "connect", new Object[] {target, data, //$NON-NLS-1$
+				new Integer(timeout)});
+		if (isConnected())
+			throw new ContainerConnectException("Already connected"); //$NON-NLS-1$
+		if (target == null)
+			throw new ContainerConnectException("target must not be null"); //$NON-NLS-1$
+		if (!(target instanceof JMSID))
+			throw new ContainerConnectException("target must be of type JMSID"); //$NON-NLS-1$
+		if (!(data instanceof Serializable))
+			throw new ContainerConnectException("data for connect to target=" + target + " is not serializable", new NotSerializableException()); //$NON-NLS-1$//$NON-NLS-2$
 
-			Serializable result = null;
+		Serializable result = null;
+		synchronized (waitResponse) {
 			try {
 				final Serializable connectData = setupJMS((JMSID) target, data);
 				Trace.trace(Activator.PLUGIN_ID, "connecting to " + target + "," //$NON-NLS-1$ //$NON-NLS-2$
@@ -61,15 +61,15 @@ public abstract class AbstractJMSClientChannel extends AbstractJMSChannel implem
 			} catch (final Exception e) {
 				throw new ContainerConnectException("connect to target=" + target.getName() + " failed", e); //$NON-NLS-1$ //$NON-NLS-2$
 			}
-			if (result == null)
-				throw new ContainerConnectException("connect to target=" + target.getName() + " refused"); //$NON-NLS-1$ //$NON-NLS-2$
-			if (!(result instanceof ConnectResponseMessage))
-				throw new ContainerConnectException("invalid response for connect to target=" + target.getName()); //$NON-NLS-1$
-			final Object resultData = ((ConnectResponseMessage) result).getData();
-			fireListenersConnect(new ConnectionEvent(this, resultData));
-			Trace.exiting(Activator.PLUGIN_ID, JmsDebugOptions.METHODS_EXITING, this.getClass(), "connect", resultData); //$NON-NLS-1$
-			return resultData;
 		}
+		if (result == null)
+			throw new ContainerConnectException("connect to target=" + target.getName() + " refused"); //$NON-NLS-1$ //$NON-NLS-2$
+		if (!(result instanceof ConnectResponseMessage))
+			throw new ContainerConnectException("invalid response for connect to target=" + target.getName()); //$NON-NLS-1$
+		final Object resultData = ((ConnectResponseMessage) result).getData();
+		fireListenersConnect(new ConnectionEvent(this, resultData));
+		Trace.exiting(Activator.PLUGIN_ID, JmsDebugOptions.METHODS_EXITING, this.getClass(), "connect", resultData); //$NON-NLS-1$
+		return resultData;
 	}
 
 	protected void handleSynchRequest(String jmsCorrelationID, ECFMessage o) {
@@ -91,14 +91,10 @@ public abstract class AbstractJMSClientChannel extends AbstractJMSChannel implem
 	public Object sendSynch(ID target, byte[] data) throws IOException {
 		Trace.entering(Activator.PLUGIN_ID, JmsDebugOptions.METHODS_ENTERING, this.getClass(), "sendSynch", new Object[] {target, data}); //$NON-NLS-1$
 		Object result = null;
-		boolean active = true;
-		synchronized (waitResponse) {
-			active = isActive();
-			if (active)
-				isStopping = true;
-		}
-		if (active)
-			result = sendAndWait(new DisconnectRequestMessage(getConnectionID(), getLocalID(), target, data), disconnectWaitTime);
+		if (!isActive())
+			return null;
+		isStopping = true;
+		result = sendAndWait(new DisconnectRequestMessage(getConnectionID(), getLocalID(), target, data), disconnectWaitTime);
 		Trace.exiting(Activator.PLUGIN_ID, JmsDebugOptions.METHODS_EXITING, this.getClass(), "sendSynch", result); //$NON-NLS-1$
 		return result;
 	}

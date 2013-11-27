@@ -74,8 +74,8 @@ public class ActiveMQJMSClientContainerInstantiator extends
 		List<String> supportedConfigs = Arrays.asList(exporterSupportedConfigs);
 		if (JMS_CLIENT_NAME.equals(description.getName())) {
 			if (
-					// If it's a normal manager
-					supportedConfigs
+			// If it's a normal manager
+			supportedConfigs
 					.contains(ActiveMQJMSServerContainerInstantiator.JMS_MANAGER_NAME)
 					// Or the service exporter is a client
 					|| supportedConfigs.contains(JMS_CLIENT_NAME)

@@ -37,7 +37,6 @@ public abstract class AbstractJMSChannel extends SocketAddress implements ISynch
 	protected Session session = null;
 	protected JmsTopicSession jmsTopicSession = null;
 	protected ID localContainerID;
-	protected boolean connected = false;
 	private boolean started = false;
 	protected ISynchAsynchEventHandler handler;
 	protected int keepAlive = -1;
@@ -135,7 +134,6 @@ public abstract class AbstractJMSChannel extends SocketAddress implements ISynch
 			session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 			jmsTopicSession = new JmsTopicSession(session, targetID.getTopicOrQueueName());
 			jmsTopicSession.getConsumer().setMessageListener(new TopicReceiver());
-			connected = true;
 			isStopping = false;
 			connection.start();
 			Serializable connectData = createConnectRequestData(data);
@@ -186,7 +184,7 @@ public abstract class AbstractJMSChannel extends SocketAddress implements ISynch
 	 * @see org.eclipse.ecf.provider.comm.IConnection#isConnected()
 	 */
 	public boolean isConnected() {
-		return connected;
+		return (connection != null);
 	}
 
 	/*
@@ -241,17 +239,16 @@ public abstract class AbstractJMSChannel extends SocketAddress implements ISynch
 	 */
 	public void disconnect() {
 		Trace.entering(Activator.PLUGIN_ID, JmsDebugOptions.METHODS_ENTERING, this.getClass(), "disconnect"); //$NON-NLS-1$
-		synchronized (waitResponse) {
-			stop();
-			connected = false;
-			if (connection != null) {
-				try {
-					connection.close();
-				} catch (Exception e) {
-					Activator.getDefault().log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, IStatus.ERROR, "connection close", e)); //$NON-NLS-1$
-				}
-				connection = null;
+		stop();
+		if (connection != null) {
+			try {
+				connection.close();
+			} catch (Exception e) {
+				Activator.getDefault().log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, IStatus.ERROR, "connection close", e)); //$NON-NLS-1$
 			}
+			connection = null;
+		}
+		synchronized (waitResponse) {
 			waitResponse.notifyAll();
 		}
 		fireListenersDisconnect(new ConnectionEvent(this, null));
@@ -335,6 +332,7 @@ public abstract class AbstractJMSChannel extends SocketAddress implements ISynch
 
 	protected void waitForReply(long waitDuration) throws IOException {
 		long waittimeout = System.currentTimeMillis() + waitDuration;
+		waitDone = false;
 		while (!waitDone && (waittimeout - System.currentTimeMillis() > 0)) {
 			try {
 				waitResponse.wait(waitDuration / 10);
@@ -418,9 +416,9 @@ public abstract class AbstractJMSChannel extends SocketAddress implements ISynch
 					else if (ecfmsg instanceof SynchRequestMessage)
 						handleSynchRequest(correlationId, ecfmsg);
 					else if (ecfmsg instanceof SynchResponseMessage) {
-						synchronized (waitResponse) {
-							String c = getCorrelation();
-							if (c == null || c.equals(correlationId)) {
+						String c = getCorrelation();
+						if (c != null && c.equals(correlationId)) {
+							synchronized (waitResponse) {
 								setReply(ecfmsg);
 								waitDone = true;
 								resetCorrelation();

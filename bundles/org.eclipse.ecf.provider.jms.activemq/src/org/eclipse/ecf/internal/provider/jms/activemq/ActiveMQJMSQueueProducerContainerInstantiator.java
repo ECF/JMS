@@ -29,7 +29,7 @@ public class ActiveMQJMSQueueProducerContainerInstantiator extends
 	protected static final String[] jmsIntents = { "JMS" };
 
 	protected static final String JMS_LBMANAGER_NAME = "ecf.jms.activemq.tcp.manager.lb.svchost";
-	
+
 	public ActiveMQJMSQueueProducerContainerInstantiator() {
 
 	}
@@ -83,12 +83,14 @@ public class ActiveMQJMSQueueProducerContainerInstantiator extends
 		return (String[]) results.toArray(new String[] {});
 	}
 
-	public String[] getImportedConfigs(ContainerTypeDescription description, String[] exporterSupportedConfigs) {
+	public String[] getImportedConfigs(ContainerTypeDescription description,
+			String[] exporterSupportedConfigs) {
 		List<String> results = new ArrayList<String>();
 		List<String> supportedConfigs = Arrays.asList(exporterSupportedConfigs);
 		// For a manager, if a client is exporter then we are an importer
 		if (JMS_LBMANAGER_NAME.equals(description.getName())) {
-			if (supportedConfigs.contains(ActiveMQJMSClientContainerInstantiator.JMS_CLIENT_NAME))
+			if (supportedConfigs
+					.contains(ActiveMQJMSClientContainerInstantiator.JMS_CLIENT_NAME))
 				results.add(JMS_LBMANAGER_NAME);
 		}
 		if (results.size() == 0)

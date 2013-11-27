@@ -83,9 +83,7 @@ public abstract class AbstractJMSServerChannel extends AbstractJMSChannel implem
 		}
 
 		public void disconnect() {
-			synchronized (waitResponse) {
-				stop();
-			}
+			stop();
 		}
 
 		public ID getLocalID() {

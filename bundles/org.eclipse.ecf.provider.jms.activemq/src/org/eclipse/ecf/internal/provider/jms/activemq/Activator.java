@@ -20,7 +20,7 @@ public class Activator implements BundleActivator {
 
 	private BundleContext context = null;
 
-	private ServiceTracker<LogService,LogService> logServiceTracker = null;
+	private ServiceTracker<LogService, LogService> logServiceTracker = null;
 
 	/**
 	 * The constructor
@@ -30,8 +30,8 @@ public class Activator implements BundleActivator {
 
 	protected LogService getLogService() {
 		if (logServiceTracker == null) {
-			logServiceTracker = new ServiceTracker<LogService,LogService>(this.context,
-					LogService.class, null);
+			logServiceTracker = new ServiceTracker<LogService, LogService>(
+					this.context, LogService.class, null);
 			logServiceTracker.open();
 		}
 		return (LogService) logServiceTracker.getService();
@@ -40,8 +40,8 @@ public class Activator implements BundleActivator {
 	public void log(IStatus status) {
 		LogService logService = getLogService();
 		if (logService != null) {
-			logService.log(LogHelper.getLogCode(status), LogHelper
-					.getLogMessage(status), status.getException());
+			logService.log(LogHelper.getLogCode(status),
+					LogHelper.getLogMessage(status), status.getException());
 		}
 	}
 
