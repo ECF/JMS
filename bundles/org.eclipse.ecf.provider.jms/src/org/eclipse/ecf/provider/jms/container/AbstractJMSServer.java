@@ -16,7 +16,6 @@ import java.net.ConnectException;
 import java.net.SocketAddress;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.ecf.core.ContainerConnectException;
 import org.eclipse.ecf.core.events.ContainerConnectedEvent;
 import org.eclipse.ecf.core.identity.ID;
 import org.eclipse.ecf.core.security.IConnectHandlerPolicy;
@@ -134,7 +133,7 @@ public abstract class AbstractJMSServer extends ServerSOContainer {
 				throw new InvalidObjectException("JoinGroupMessage cannot be null"); //$NON-NLS-1$
 			synchronized (getGroupMembershipLock()) {
 				if (isClosing)
-					throw new ContainerConnectException("Container is closing"); //$NON-NLS-1$
+					return null;
 				// Now check to see if this request is going to be allowed
 				checkJoin(channel, remoteID, request.getTargetJMSID().getTopicOrQueueName(), jgm.getData());
 				// create new local client for remote
