@@ -17,6 +17,8 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.ecf.core.identity.ID;
 import org.eclipse.ecf.core.util.ECFException;
 import org.eclipse.ecf.provider.remoteservice.generic.*;
+import org.eclipse.ecf.provider.remoteservice.generic.RemoteServiceRegistrationImpl;
+import org.eclipse.ecf.provider.remoteservice.generic.RemoteServiceRegistryImpl;
 import org.eclipse.ecf.remoteservice.*;
 
 public class LBRegistrySharedObject extends RegistrySharedObject {
