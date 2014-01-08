@@ -16,7 +16,7 @@ import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
- * The main plugin class to be used in the desktop.
+ * The main plugin class to be used in the desktop. some more comment
  */
 public class Activator implements BundleActivator {
 
