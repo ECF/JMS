@@ -28,6 +28,8 @@ public class ActiveMQJMSQueueConsumerContainerInstantiator extends
 	public static final String QUEUE_PROPERTY = "queue";
 	public static final String CONTAINER_ID_PROPERTY = "containerId";
 
+	public static final String NAME = "ecf.jms.activemq.tcp.lb.server";
+	
 	public ActiveMQJMSQueueConsumerContainerInstantiator() {
 
 	}

@@ -34,6 +34,7 @@ public class ActiveMQJMSQueueProducerContainerInstantiator extends
 	protected static final String[] jmsIntents = { "JMS" };
 
 	protected static final String JMS_LBMANAGER_NAME = "ecf.jms.activemq.tcp.manager.lb.svchost";
+	public static final String NAME = "ecf.jms.activemq.tcp.manager.lb.svchost";
 
 	public ActiveMQJMSQueueProducerContainerInstantiator() {
 
