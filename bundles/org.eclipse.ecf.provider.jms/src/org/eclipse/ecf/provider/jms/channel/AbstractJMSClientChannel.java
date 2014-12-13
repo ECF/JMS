@@ -57,9 +57,13 @@ public abstract class AbstractJMSClientChannel extends AbstractJMSChannel implem
 				result = sendAndWait(new ConnectRequestMessage(getConnectionID(), getLocalID(), (JMSID) target, connectData));
 			} catch (final ECFException e) {
 				final ECFException except = e;
-				throw new ContainerConnectException(except.getStatus());
+				ContainerConnectException t = new ContainerConnectException(except.getStatus());
+				t.setStackTrace(e.getStackTrace());
+				throw t;
 			} catch (final Exception e) {
-				throw new ContainerConnectException("connect to target=" + target.getName() + " failed", e); //$NON-NLS-1$ //$NON-NLS-2$
+				ContainerConnectException t = new ContainerConnectException("connect to target=" + target.getName() + " failed", e); //$NON-NLS-1$ //$NON-NLS-2$
+				t.setStackTrace(e.getStackTrace());
+				throw t;
 			}
 		}
 		if (result == null)

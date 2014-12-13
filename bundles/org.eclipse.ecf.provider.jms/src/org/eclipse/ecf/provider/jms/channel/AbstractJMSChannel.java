@@ -142,7 +142,9 @@ public abstract class AbstractJMSChannel extends SocketAddress implements ISynch
 		} catch (Exception e) {
 			disconnect();
 			Trace.entering(Activator.PLUGIN_ID, JmsDebugOptions.EXCEPTIONS_THROWING, this.getClass(), "setupJMS"); //$NON-NLS-1$
-			throw new ECFException("JMS Connect or Setup Exception", e); //$NON-NLS-1$
+			ECFException t = new ECFException("JMS Connect or Setup Exception", e); //$NON-NLS-1$
+			t.setStackTrace(e.getStackTrace());
+			throw t;
 		}
 	}
 
@@ -175,7 +177,10 @@ public abstract class AbstractJMSChannel extends SocketAddress implements ISynch
 
 	protected void throwIOException(String method, String msg, Throwable t) throws IOException {
 		Trace.throwing(Activator.PLUGIN_ID, JmsDebugOptions.EXCEPTIONS_CATCHING, this.getClass(), method, t);
-		throw new IOException(msg + ": " + t.getMessage()); //$NON-NLS-1$
+		IOException e = new IOException(msg + ": " + t.getMessage()); //$NON-NLS-1$
+		if (t != null)
+			e.setStackTrace(t.getStackTrace());
+		throw e;
 	}
 
 	/*

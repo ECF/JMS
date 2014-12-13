@@ -38,7 +38,9 @@ public class JMSNamespace extends Namespace {
 			}
 			throw new IllegalArgumentException("Parameters invalid for JMSID creation.  Must be of either String or URI type"); //$NON-NLS-1$
 		} catch (Exception e) {
-			throw new IDCreateException("JMSID creation failed", e); //$NON-NLS-1$
+			IDCreateException t = new IDCreateException("JMSID creation failed", e); //$NON-NLS-1$
+			t.setStackTrace(e.getStackTrace());
+			throw t;
 		}
 	}
 

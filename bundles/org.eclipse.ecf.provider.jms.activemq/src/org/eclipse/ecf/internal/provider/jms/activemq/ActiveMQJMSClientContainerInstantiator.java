@@ -59,8 +59,10 @@ public class ActiveMQJMSClientContainerInstantiator extends
 			return new ActiveMQJMSClientContainer(new JMSContainerConfig(id,
 					ka.intValue(), props));
 		} catch (Exception e) {
-			throw new ContainerCreateException(
+			ContainerCreateException t = new ContainerCreateException(
 					"Exception creating activemq client container", e);
+			t.setStackTrace(e.getStackTrace());
+			throw t;
 		}
 	}
 

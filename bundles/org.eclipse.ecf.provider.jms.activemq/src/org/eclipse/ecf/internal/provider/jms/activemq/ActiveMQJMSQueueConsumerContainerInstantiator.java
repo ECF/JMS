@@ -68,8 +68,10 @@ public class ActiveMQJMSQueueConsumerContainerInstantiator extends
 			server.start();
 			return server;
 		} catch (Exception e) {
-			throw new ContainerCreateException(
+			ContainerCreateException t = new ContainerCreateException(
 					"Exception creating activemq server container", e);
+			t.setStackTrace(e.getStackTrace());
+			throw t;
 		}
 	}
 
