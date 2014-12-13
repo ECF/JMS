@@ -21,7 +21,7 @@ public class JMSNamespace extends Namespace {
 	public static final String NAME = "ecf.namespace.jmsid"; //$NON-NLS-1$
 
 	public JMSNamespace() {
-		super(NAME, null);
+		super(NAME, "JMS Namespace"); //$NON-NLS-1$
 	}
 
 	public ID createInstance(Object[] args) throws IDCreateException {
