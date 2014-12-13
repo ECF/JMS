@@ -31,6 +31,7 @@ public class ActiveMQJMSServerContainerInstantiator extends
 	protected static final String JMS_MANAGER_NAME = "ecf.jms.activemq.tcp.manager";
 
 	public static final String ID_PARAM = "id";
+	public static final String KEEPALIVE_PARAM = "keepAlive";
 
 	private JMSID getJMSIDFromParameter(Object p) {
 		if (p instanceof String) {
@@ -50,29 +51,33 @@ public class ActiveMQJMSServerContainerInstantiator extends
 	 * org.eclipse.ecf.core.provider.IContainerInstantiator#createInstance(org
 	 * .eclipse.ecf.core.ContainerTypeDescription, java.lang.Object[])
 	 */
+	@SuppressWarnings("rawtypes")
 	public IContainer createInstance(ContainerTypeDescription description,
 			Object[] args) throws ContainerCreateException {
 		try {
 			JMSID serverID = null;
+			Map props = null;
+			Integer ka = null;
 			if (args == null)
 				serverID = getJMSIDFromParameter((String) ActiveMQJMSServerContainer.DEFAULT_SERVER_ID);
 			else if (args.length > 0) {
 				if (args[0] instanceof Map) {
-					@SuppressWarnings("rawtypes")
-					Map map = (Map) args[0];
-					Object o = map.get(ID_PARAM);
-					if (o != null && o instanceof String)
-						serverID = getJMSIDFromParameter(o);
-				} else
+					props = (Map) args[0];
+					serverID = getJMSIDFromParameter((String) props
+							.get(ID_PARAM));
+					Object kao = props.get(KEEPALIVE_PARAM);
+					if (kao != null)
+						ka = getIntegerFromArg(kao);
+				} else {
 					serverID = getJMSIDFromParameter(args[0]);
+					if (args.length > 1)
+						ka = getIntegerFromArg(args[1]);
+				}
 			}
-			Integer ka = null;
-			if (args != null && args.length > 1)
-				ka = getIntegerFromArg(args[1]);
 			if (ka == null)
 				ka = new Integer(ActiveMQJMSServerContainer.DEFAULT_KEEPALIVE);
 			ActiveMQJMSServerContainer server = new ActiveMQJMSServerContainer(
-					new JMSContainerConfig(serverID, ka.intValue(), null));
+					new JMSContainerConfig(serverID, ka.intValue(), props));
 			server.start();
 			return server;
 		} catch (Exception e) {
@@ -83,12 +88,10 @@ public class ActiveMQJMSServerContainerInstantiator extends
 
 	public String[] getSupportedIntents(ContainerTypeDescription description) {
 		List<String> results = new ArrayList<String>();
-		for (int i = 0; i < genericProviderIntents.length; i++) {
+		for (int i = 0; i < genericProviderIntents.length; i++)
 			results.add(genericProviderIntents[i]);
-		}
-		for (int i = 0; i < jmsIntents.length; i++) {
+		for (int i = 0; i < jmsIntents.length; i++)
 			results.add(jmsIntents[i]);
-		}
 		return (String[]) results.toArray(new String[] {});
 	}
 

@@ -8,6 +8,7 @@
  ******************************************************************************/
 package org.eclipse.ecf.provider.jms.activemq.container;
 
+import org.apache.activemq.ActiveMQConnectionFactory;
 import org.eclipse.ecf.core.util.ECFException;
 import org.eclipse.ecf.provider.comm.ISynchAsynchConnection;
 import org.eclipse.ecf.provider.jms.container.AbstractJMSServer;
@@ -17,11 +18,11 @@ public class ActiveMQJMSServerContainer extends AbstractJMSServer {
 
 	public static final String PASSWORD_PROPERTY = "password";
 	public static final String USERNAME_PROPERTY = "username";
-	public static final String DEFAULT_PASSWORD = "defaultPassword";
-	public static final String DEFAULT_USERNAME = "defaultUsername";
+	public static final String DEFAULT_PASSWORD = ActiveMQConnectionFactory.DEFAULT_PASSWORD;
+	public static final String DEFAULT_USERNAME = ActiveMQConnectionFactory.DEFAULT_USER;
 
 	public static final String DEFAULT_SERVER_ID = "tcp://localhost:61616/exampleTopic";
-	
+
 	public ActiveMQJMSServerContainer(JMSContainerConfig config) {
 		super(config);
 	}
@@ -32,13 +33,11 @@ public class ActiveMQJMSServerContainer extends AbstractJMSServer {
 	 * @see org.eclipse.ecf.provider.jms.container.AbstractJMSServer#start()
 	 */
 	public void start() throws ECFException {
-		JMSContainerConfig config = (JMSContainerConfig) getConfig();
-		final String username = (String) config.getProperties().get(
-				ActiveMQJMSServerContainer.USERNAME_PROPERTY);
-		final String password = (String) config.getProperties().get(
-				ActiveMQJMSServerContainer.PASSWORD_PROPERTY);
+		JMSContainerConfig config = getJMSContainerConfig();
 		final ISynchAsynchConnection connection = new ActiveMQServerChannel(
-				this.getReceiver(), config.getKeepAlive(), username, password);
+				getReceiver(), config.getKeepAlive(), config.getPropertyString(
+						USERNAME_PROPERTY, DEFAULT_USERNAME),
+				config.getPropertyString(PASSWORD_PROPERTY, DEFAULT_PASSWORD));
 		setConnection(connection);
 		connection.start();
 	}
@@ -46,10 +45,8 @@ public class ActiveMQJMSServerContainer extends AbstractJMSServer {
 	public void dispose() {
 		super.dispose();
 		ISynchAsynchConnection connection = getConnection();
-		if (connection != null) {
+		if (connection != null)
 			connection.disconnect();
-			//setConnection(null);
-		}
 	}
 
 }

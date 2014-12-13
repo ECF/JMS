@@ -8,6 +8,8 @@
  ******************************************************************************/
 package org.eclipse.ecf.provider.jms.activemq.container;
 
+import java.util.Map;
+
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
 
@@ -20,32 +22,43 @@ import org.eclipse.ecf.remoteservice.IRemoteServiceCallPolicy;
 public class ActiveMQJMSQueueConsumerContainer extends
 		AbstractJMSQueueConsumerContainer {
 
+	@SuppressWarnings("rawtypes")
+	private Map properties;
+
 	public ActiveMQJMSQueueConsumerContainer(JMSID containerID, JMSID queueID) {
+		this(containerID, queueID, null);
+	}
+
+	private String getPropertyValue(String propName, String defaultValue) {
+		if (properties == null)
+			return defaultValue;
+		String o = (String) properties.get(propName);
+		return (o == null) ? defaultValue : o;
+	}
+
+	public ActiveMQJMSQueueConsumerContainer(JMSID containerID, JMSID queueID,
+			@SuppressWarnings("rawtypes") Map props) {
 		super(containerID, queueID);
+		this.properties = props;
 	}
 
 	public ConnectionFactory getQueueConnectionFactory(String target,
 			Object[] jmsConfiguration) {
-		String username = null;
-		String password = null;
-		if (jmsConfiguration != null && jmsConfiguration.length > 0) {
-			username = (String) jmsConfiguration[0];
-			if (jmsConfiguration.length > 1) {
-				password = (String) jmsConfiguration[1];
-			}
-		}
-		return new ActiveMQConnectionFactory(
-				(username == null) ? ActiveMQConnectionFactory.DEFAULT_USER
-						: username,
-				(password == null) ? ActiveMQConnectionFactory.DEFAULT_PASSWORD
-						: password, target);
+		return new ActiveMQConnectionFactory(getPropertyValue(
+				ActiveMQJMSServerContainer.USERNAME_PROPERTY,
+				ActiveMQJMSServerContainer.DEFAULT_USERNAME), getPropertyValue(
+				ActiveMQJMSServerContainer.PASSWORD_PROPERTY,
+				ActiveMQJMSServerContainer.DEFAULT_PASSWORD), target);
 	}
 
 	public void start() throws ECFException {
 		try {
 			setupJMSQueueConsumer(getQueueID());
 		} catch (JMSException e) {
-			throw new ECFException("Could not connect to queueID=" + queueID, e); //$NON-NLS-1$
+			ECFException t = new ECFException(
+					"Could not connect to queueID=" + queueID, e); //$NON-NLS-1$
+			t.setStackTrace(e.getStackTrace());
+			throw t;
 		}
 	}
 

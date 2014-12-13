@@ -8,6 +8,9 @@ import org.eclipse.ecf.tests.ContainerAbstractTestCase;
 public abstract class JMSContainerAbstractTestCase extends
 		ContainerAbstractTestCase {
 
+	public static final boolean useBroker = new Boolean(System.getProperty(
+			"org.eclipse.ecf.provider.jms.useBroker", "true")).booleanValue();
+
 	protected abstract String getClientContainerName();
 
 	protected abstract String getServerIdentity();
@@ -26,7 +29,8 @@ public abstract class JMSContainerAbstractTestCase extends
 	}
 
 	protected void setupBroker() throws Exception {
-		broker = new BrokerUtil(getContainerManager());
+		if (useBroker) 
+			broker = new BrokerUtil(getContainerManager());
 	}
 
 	private BrokerUtil broker;

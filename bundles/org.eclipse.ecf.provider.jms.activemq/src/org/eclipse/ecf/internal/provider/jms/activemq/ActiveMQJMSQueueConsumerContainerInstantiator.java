@@ -10,6 +10,7 @@ package org.eclipse.ecf.internal.provider.jms.activemq;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.ecf.core.ContainerCreateException;
 import org.eclipse.ecf.core.ContainerTypeDescription;
@@ -24,6 +25,8 @@ public class ActiveMQJMSQueueConsumerContainerInstantiator extends
 		GenericContainerInstantiator {
 
 	protected static final String[] jmsIntents = { "JMS" };
+	public static final String QUEUE_PROPERTY = "queue";
+	public static final String CONTAINER_ID_PROPERTY = "containerId";
 
 	public ActiveMQJMSQueueConsumerContainerInstantiator() {
 
@@ -36,27 +39,32 @@ public class ActiveMQJMSQueueConsumerContainerInstantiator extends
 	 * org.eclipse.ecf.core.provider.IContainerInstantiator#createInstance(org
 	 * .eclipse.ecf.core.ContainerTypeDescription, java.lang.Object[])
 	 */
+	@SuppressWarnings("rawtypes")
 	public IContainer createInstance(ContainerTypeDescription description,
 			Object[] args) throws ContainerCreateException {
 		try {
-			String name = null;
+			String queue = null;
+			Map props = null;
+			String containerId = null;
 			if (args.length == 0)
 				throw new ContainerCreateException(
-						"No QueueID provided for creation");
-			name = (String) args[0];
-			JMSID queueID = (JMSID) IDFactory.getDefault().createID(
-					JMSNamespace.NAME, name);
-			JMSID containerID = null;
-			if (args.length > 1) {
-				containerID = (JMSID) IDFactory.getDefault().createID(
-						JMSNamespace.NAME, (String) args[1]);
+						"No QueueID provided for creation of ActiveMQJMSQueueConsumerContainer");
+			if (args[0] instanceof Map) {
+				props = (Map) args[0];
+				queue = (String) props.get(QUEUE_PROPERTY);
+				containerId = (String) props.get(CONTAINER_ID_PROPERTY);
+			} else {
+				queue = (String) args[0];
+				if (args.length > 1)
+					containerId = (String) args[1];
 			}
-			if (containerID == null)
-				containerID = (JMSID) IDFactory.getDefault().createID(
-						JMSNamespace.NAME,
-						IDFactory.getDefault().createGUID().getName());
+			if (containerId == null)
+				containerId = IDFactory.getDefault().createGUID().getName();
 			ActiveMQJMSQueueConsumerContainer server = new ActiveMQJMSQueueConsumerContainer(
-					containerID, queueID);
+					(JMSID) IDFactory.getDefault().createID(JMSNamespace.NAME,
+							(String) containerId), (JMSID) IDFactory
+							.getDefault().createID(JMSNamespace.NAME, queue),
+					props);
 			server.start();
 			return server;
 		} catch (Exception e) {
@@ -67,12 +75,10 @@ public class ActiveMQJMSQueueConsumerContainerInstantiator extends
 
 	public String[] getSupportedIntents(ContainerTypeDescription description) {
 		List<String> results = new ArrayList<String>();
-		for (int i = 0; i < genericProviderIntents.length; i++) {
+		for (int i = 0; i < genericProviderIntents.length; i++)
 			results.add(genericProviderIntents[i]);
-		}
-		for (int i = 0; i < jmsIntents.length; i++) {
+		for (int i = 0; i < jmsIntents.length; i++)
 			results.add(jmsIntents[i]);
-		}
 		return (String[]) results.toArray(new String[] {});
 	}
 

@@ -59,8 +59,12 @@ public class JMSContainerConfig extends SOContainerConfig {
 		this(id, AbstractJMSServer.DEFAULT_KEEPALIVE);
 	}
 
+	public JMSContainerConfig(String name, int keepAlive, Map props) {
+		this((JMSID) IDFactory.getDefault().createID(JMSNamespace.NAME, name), keepAlive, props);
+	}
+
 	public JMSContainerConfig(String name, int keepAlive) {
-		this((JMSID) IDFactory.getDefault().createID(JMSNamespace.NAME, name));
+		this(name, keepAlive, null);
 	}
 
 	public JMSContainerConfig(String name) {
@@ -84,4 +88,12 @@ public class JMSContainerConfig extends SOContainerConfig {
 		return keepAlive;
 	}
 
+	public Object getPropertyValue(String propName) {
+		return getProperties().get(propName);
+	}
+
+	public String getPropertyString(String propName, String defaultValue) {
+		Object val = getPropertyValue(propName);
+		return (val == null) ? defaultValue : (String) val;
+	}
 }

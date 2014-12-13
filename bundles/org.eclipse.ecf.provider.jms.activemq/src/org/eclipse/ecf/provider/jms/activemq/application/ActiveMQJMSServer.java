@@ -63,8 +63,8 @@ public class ActiveMQJMSServer implements IApplication {
 
 			synchronized (this) {
 				try {
-				serverContainer = new ActiveMQJMSServerContainer(config);
-				serverContainer.start();
+					serverContainer = new ActiveMQJMSServerContainer(config);
+					serverContainer.start();
 				} catch (Throwable t) {
 					t.printStackTrace();
 				}

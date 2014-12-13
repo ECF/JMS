@@ -21,11 +21,6 @@ import org.eclipse.ecf.provider.jms.identity.JMSID;
 public class ActiveMQJMSQueueProducerContainer extends
 		AbstractLBQueueProducerContainer {
 
-	public static final String PASSWORD_PROPERTY = "password";
-	public static final String USERNAME_PROPERTY = "username";
-	public static final String DEFAULT_PASSWORD = "defaultPassword";
-	public static final String DEFAULT_USERNAME = "defaultUsername";
-
 	public ActiveMQJMSQueueProducerContainer(JMSContainerConfig config,
 			JMSID queueID) {
 		super(config, queueID);
@@ -37,18 +32,24 @@ public class ActiveMQJMSQueueProducerContainer extends
 	 * @see org.eclipse.ecf.provider.jms.container.AbstractJMSServer#start()
 	 */
 	public void start() throws ECFException {
-		JMSContainerConfig config = (JMSContainerConfig) getConfig();
-		final String username = (String) config.getProperties().get(
-				ActiveMQJMSQueueProducerContainer.USERNAME_PROPERTY);
-		final String password = (String) config.getProperties().get(
-				ActiveMQJMSQueueProducerContainer.PASSWORD_PROPERTY);
+		JMSContainerConfig config = getJMSContainerConfig();
 		final ISynchAsynchConnection connection = new ActiveMQServerChannel(
-				this.getReceiver(), config.getKeepAlive(), username, password);
+				this.getReceiver(), config.getKeepAlive(),
+				config.getPropertyString(
+						ActiveMQJMSServerContainer.USERNAME_PROPERTY,
+						ActiveMQJMSServerContainer.DEFAULT_USERNAME),
+				config.getPropertyString(
+						ActiveMQJMSServerContainer.PASSWORD_PROPERTY,
+						ActiveMQJMSServerContainer.DEFAULT_PASSWORD));
 		setConnection(connection);
 		try {
 			setupJMSQueueProducer(getQueueID());
 		} catch (JMSException e) {
-			throw new ECFException("Cannot setup queueID=" + getQueueID(), e);
+			ECFException t = new ECFException("Cannot setup queueID="
+					+ getQueueID()
+					+ " for ActiveMQJMSQueueProducerContainer id=" + getID(), e);
+			t.setStackTrace(t.getStackTrace());
+			throw t;
 		}
 		connection.start();
 	}
@@ -61,19 +62,13 @@ public class ActiveMQJMSQueueProducerContainer extends
 
 	public ConnectionFactory getQueueConnectionFactory(String target,
 			Object[] jmsConfiguration) {
-		String username = null;
-		String password = null;
-		if (jmsConfiguration != null && jmsConfiguration.length > 0) {
-			username = (String) jmsConfiguration[0];
-			if (jmsConfiguration.length > 1) {
-				password = (String) jmsConfiguration[1];
-			}
-		}
-		return new ActiveMQConnectionFactory(
-				(username == null) ? ActiveMQConnectionFactory.DEFAULT_USER
-						: username,
-				(password == null) ? ActiveMQConnectionFactory.DEFAULT_PASSWORD
-						: password, target);
+		JMSContainerConfig config = getJMSContainerConfig();
+		return new ActiveMQConnectionFactory(config.getPropertyString(
+				ActiveMQJMSServerContainer.USERNAME_PROPERTY,
+				ActiveMQJMSServerContainer.DEFAULT_USERNAME),
+				config.getPropertyString(
+						ActiveMQJMSServerContainer.PASSWORD_PROPERTY,
+						ActiveMQJMSServerContainer.DEFAULT_PASSWORD), target);
 	}
 
 }

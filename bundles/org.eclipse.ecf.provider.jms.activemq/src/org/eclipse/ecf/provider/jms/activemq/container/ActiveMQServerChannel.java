@@ -30,15 +30,17 @@ public class ActiveMQServerChannel extends AbstractJMSServerChannel {
 		setupJMS((JMSID) localContainerID, null);
 	}
 
-	protected Object readObject(byte[] bytes) throws IOException, ClassNotFoundException {
-		ObjectInputStream oos = new ObjectInputStream(new ByteArrayInputStream(bytes));
+	protected Object readObject(byte[] bytes) throws IOException,
+			ClassNotFoundException {
+		ObjectInputStream oos = new ObjectInputStream(new ByteArrayInputStream(
+				bytes));
 		return oos.readObject();
 	}
 
 	protected ConnectionFactory createJMSConnectionFactory(JMSID targetID)
 			throws IOException {
-		return new ActiveMQConnectionFactory((username == null) ? "defaultUsername" : username,
-				(password == null) ? "defaultPassword" : password, targetID.getName());
+		return new ActiveMQConnectionFactory(username, password,
+				targetID.getName());
 	}
 
 }

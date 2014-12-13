@@ -27,45 +27,6 @@ public class ActiveMQJMSClientContainer extends AbstractJMSClient {
 
 	private int keepAlive;
 
-	private int getKeepAlive() {
-		return keepAlive;
-	}
-
-	class ActiveMQClientChannel extends AbstractJMSClientChannel {
-
-		private static final long serialVersionUID = -5581778054975360068L;
-
-		public ActiveMQClientChannel() {
-			super(getReceiver(), getKeepAlive());
-		}
-
-		protected Object readObject(byte[] bytes) throws IOException, ClassNotFoundException {
-			ObjectInputStream oos = new ObjectInputStream(new ByteArrayInputStream(bytes));
-			return oos.readObject();
-		}
-
-		protected ConnectionFactory createJMSConnectionFactory(JMSID targetID)
-				throws IOException {
-			return new ActiveMQConnectionFactory(getUsername(),
-					getPassword(), targetID.getName());
-		}
-
-		private String getPassword() {
-			String pw = (String) getConfig().getProperties().get(
-					ActiveMQJMSServerContainer.PASSWORD_PROPERTY);
-			return (pw == null) ? ActiveMQJMSServerContainer.DEFAULT_PASSWORD
-					: pw;
-		}
-
-		private String getUsername() {
-			String username = (String) getConfig().getProperties().get(
-					ActiveMQJMSServerContainer.USERNAME_PROPERTY);
-			return (username == null) ? ActiveMQJMSServerContainer.DEFAULT_USERNAME
-					: username;
-		}
-
-	}
-
 	/**
 	 * @param keepAlive
 	 * @throws Exception
@@ -79,6 +40,39 @@ public class ActiveMQJMSClientContainer extends AbstractJMSClient {
 			throws Exception {
 		super(new JMSContainerConfig(name, keepAlive));
 		this.keepAlive = keepAlive;
+	}
+
+	public ActiveMQJMSClientContainer(JMSContainerConfig config) {
+		super(config);
+		this.keepAlive = config.getKeepAlive();
+	}
+
+	class ActiveMQClientChannel extends AbstractJMSClientChannel {
+
+		private static final long serialVersionUID = -5581778054975360068L;
+
+		public ActiveMQClientChannel() {
+			super(getReceiver(), ActiveMQJMSClientContainer.this.keepAlive);
+		}
+
+		protected Object readObject(byte[] bytes) throws IOException,
+				ClassNotFoundException {
+			ObjectInputStream oos = new ObjectInputStream(
+					new ByteArrayInputStream(bytes));
+			return oos.readObject();
+		}
+
+		protected ConnectionFactory createJMSConnectionFactory(JMSID targetID)
+				throws IOException {
+			JMSContainerConfig config = getJMSContainerConfig();
+			return new ActiveMQConnectionFactory(config.getPropertyString(
+					ActiveMQJMSServerContainer.USERNAME_PROPERTY,
+					ActiveMQJMSServerContainer.DEFAULT_USERNAME),
+					config.getPropertyString(
+							ActiveMQJMSServerContainer.PASSWORD_PROPERTY,
+							ActiveMQJMSServerContainer.DEFAULT_PASSWORD),
+					targetID.getName());
+		}
 	}
 
 	/*

@@ -43,6 +43,10 @@ public abstract class AbstractJMSClient extends ClientSOContainer {
 		super(config);
 	}
 
+	protected JMSContainerConfig getJMSContainerConfig() {
+		return (JMSContainerConfig) getConfig();
+	}
+
 	protected void handleContainerMessage(ContainerMessage mess) throws IOException {
 		if (mess == null) {
 			debug("got null container message...ignoring"); //$NON-NLS-1$
