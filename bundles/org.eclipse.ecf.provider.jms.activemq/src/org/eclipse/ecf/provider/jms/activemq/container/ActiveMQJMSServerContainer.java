@@ -8,7 +8,6 @@
  ******************************************************************************/
 package org.eclipse.ecf.provider.jms.activemq.container;
 
-import org.apache.activemq.ActiveMQConnectionFactory;
 import org.eclipse.ecf.core.util.ECFException;
 import org.eclipse.ecf.provider.comm.ISynchAsynchConnection;
 import org.eclipse.ecf.provider.jms.container.AbstractJMSServer;
@@ -18,8 +17,8 @@ public class ActiveMQJMSServerContainer extends AbstractJMSServer {
 
 	public static final String PASSWORD_PROPERTY = "password";
 	public static final String USERNAME_PROPERTY = "username";
-	public static final String DEFAULT_PASSWORD = ActiveMQConnectionFactory.DEFAULT_PASSWORD;
-	public static final String DEFAULT_USERNAME = ActiveMQConnectionFactory.DEFAULT_USER;
+	public static final String DEFAULT_PASSWORD = "password";
+	public static final String DEFAULT_USERNAME = "guest";
 
 	public static final String DEFAULT_SERVER_ID = "tcp://localhost:61616/exampleTopic";
 
