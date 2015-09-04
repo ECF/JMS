@@ -55,6 +55,7 @@ public class LBRegistrySharedObjectConfig implements ISharedObjectConfig {
 				return LBRegistrySharedObjectConfig.this.container.getID();
 			}
 
+			@SuppressWarnings({"unchecked", "rawtypes"})
 			public Map getLocalContainerProperties() {
 				return null;
 			}
@@ -103,7 +104,8 @@ public class LBRegistrySharedObjectConfig implements ISharedObjectConfig {
 				// nothing
 			}
 
-			public Object getAdapter(Class adapter) {
+			@SuppressWarnings("unchecked")
+			public Object getAdapter(@SuppressWarnings("rawtypes") Class adapter) {
 				return null;
 			}
 		};
@@ -117,6 +119,7 @@ public class LBRegistrySharedObjectConfig implements ISharedObjectConfig {
 		return container.getID();
 	}
 
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	public Map getProperties() {
 		return null;
 	}

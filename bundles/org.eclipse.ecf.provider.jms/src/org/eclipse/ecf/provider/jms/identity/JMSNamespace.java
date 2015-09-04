@@ -68,7 +68,8 @@ public class JMSNamespace extends Namespace {
 	 * 
 	 * @see org.eclipse.ecf.core.identity.Namespace#getSupportedParameterTypesForCreateInstance()
 	 */
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	public Class[][] getSupportedParameterTypes() {
-		return new Class[][] { {String.class}, {URI.class}};
+		return new Class[][] {{String.class}, {URI.class}};
 	}
 }

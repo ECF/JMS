@@ -33,7 +33,7 @@ public class JMSContainerConfig extends SOContainerConfig {
 	 * @param props
 	 *            Any properties for this config. May be <code>null</code>.
 	 */
-	public JMSContainerConfig(JMSID id, int keepAlive, Map props) {
+	public JMSContainerConfig(JMSID id, int keepAlive, @SuppressWarnings("rawtypes") Map props) {
 		super(id, props);
 		this.keepAlive = keepAlive;
 	}
@@ -59,7 +59,7 @@ public class JMSContainerConfig extends SOContainerConfig {
 		this(id, AbstractJMSServer.DEFAULT_KEEPALIVE);
 	}
 
-	public JMSContainerConfig(String name, int keepAlive, Map props) {
+	public JMSContainerConfig(String name, int keepAlive, @SuppressWarnings("rawtypes") Map props) {
 		this((JMSID) IDFactory.getDefault().createID(JMSNamespace.NAME, name), keepAlive, props);
 	}
 

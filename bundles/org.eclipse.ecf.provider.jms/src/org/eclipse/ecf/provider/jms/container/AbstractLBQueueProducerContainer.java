@@ -75,7 +75,8 @@ public abstract class AbstractLBQueueProducerContainer extends AbstractJMSServer
 		}
 	}
 
-	public Object getAdapter(Class adapter) {
+	@SuppressWarnings("unchecked")
+	public Object getAdapter(@SuppressWarnings("rawtypes") Class adapter) {
 		if (adapter == null)
 			return null;
 		if (adapter.isAssignableFrom(IRemoteServiceContainerAdapter.class)) {

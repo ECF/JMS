@@ -68,7 +68,7 @@ public abstract class AbstractJMSClient extends ClientSOContainer {
 
 	class JMSContainerContext extends SOContext {
 
-		public JMSContainerContext(ID objID, ID homeID, SOContainer cont, Map props, IQueueEnqueue queue) {
+		public JMSContainerContext(ID objID, ID homeID, SOContainer cont, @SuppressWarnings("rawtypes") Map props, IQueueEnqueue queue) {
 			super(objID, homeID, cont, props, queue);
 		}
 	}

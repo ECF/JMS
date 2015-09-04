@@ -39,6 +39,7 @@ public abstract class AbstractJMSServerChannel extends AbstractJMSChannel implem
 
 		public static final int DEFAULT_PING_WAITTIME = 3000;
 
+		@SuppressWarnings("rawtypes")
 		private final Map properties;
 		private final ID clientID;
 		boolean isStarted = false;
@@ -63,6 +64,7 @@ public abstract class AbstractJMSServerChannel extends AbstractJMSChannel implem
 			this(clientID, true);
 		}
 
+		@SuppressWarnings("rawtypes")
 		public Client(ID clientID, boolean usePing) {
 			this.clientID = clientID;
 			this.properties = new HashMap();
@@ -90,6 +92,7 @@ public abstract class AbstractJMSServerChannel extends AbstractJMSChannel implem
 			return clientID;
 		}
 
+		@SuppressWarnings("rawtypes")
 		public Map getProperties() {
 			return properties;
 		}
@@ -127,7 +130,8 @@ public abstract class AbstractJMSServerChannel extends AbstractJMSChannel implem
 			}
 		}
 
-		public Object getAdapter(Class adapter) {
+		@SuppressWarnings("unchecked")
+		public Object getAdapter(@SuppressWarnings("rawtypes") Class adapter) {
 			return null;
 		}
 

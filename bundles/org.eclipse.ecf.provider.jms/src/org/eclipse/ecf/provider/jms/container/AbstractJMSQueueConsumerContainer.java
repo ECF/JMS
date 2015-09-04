@@ -175,14 +175,17 @@ public abstract class AbstractJMSQueueConsumerContainer extends AbstractContaine
 	}
 
 	// these lookup methods are not needed
+	@SuppressWarnings("rawtypes")
 	public IFuture asyncGetRemoteServiceReferences(ID[] idFilter, String clazz, String filter) {
 		return registry.asyncGetRemoteServiceReferences(idFilter, clazz, filter);
 	}
 
+	@SuppressWarnings("rawtypes")
 	public IFuture asyncGetRemoteServiceReferences(ID target, String clazz, String filter) {
 		return registry.asyncGetRemoteServiceReferences(target, clazz, filter);
 	}
 
+	@SuppressWarnings("rawtypes")
 	public IFuture asyncGetRemoteServiceReferences(ID target, ID[] idFilter, String clazz, String filter) {
 		return registry.asyncGetRemoteServiceReferences(target, idFilter, clazz, filter);
 	}
@@ -223,7 +226,7 @@ public abstract class AbstractJMSQueueConsumerContainer extends AbstractContaine
 		return registry.getRemoteServiceReferences(target, idFilter, clazz, filter);
 	}
 
-	public IRemoteServiceRegistration registerRemoteService(String[] clazzes, Object service, Dictionary properties) {
+	public IRemoteServiceRegistration registerRemoteService(String[] clazzes, Object service, @SuppressWarnings("rawtypes") Dictionary properties) {
 		return registry.registerRemoteService(clazzes, service, properties);
 	}
 

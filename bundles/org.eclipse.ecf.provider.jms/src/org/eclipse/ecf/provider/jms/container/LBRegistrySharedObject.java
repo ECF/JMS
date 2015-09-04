@@ -147,7 +147,7 @@ public class LBRegistrySharedObject extends RegistrySharedObject {
 
 	}
 
-	List requestHandlerJobs = new ArrayList();
+	List<RequestHandlerJob> requestHandlerJobs = new ArrayList<RequestHandlerJob>();
 
 	boolean addRequestHandlerJob(RequestHandlerJob job) {
 		synchronized (requestHandlerJobs) {
@@ -163,8 +163,8 @@ public class LBRegistrySharedObject extends RegistrySharedObject {
 
 	void cancelRequestHandlerJobs() {
 		synchronized (requestHandlerJobs) {
-			for (Iterator i = requestHandlerJobs.iterator(); i.hasNext();) {
-				RequestHandlerJob job = (RequestHandlerJob) i.next();
+			for (Iterator<RequestHandlerJob> i = requestHandlerJobs.iterator(); i.hasNext();) {
+				RequestHandlerJob job = i.next();
 				if (job.cancel())
 					i.remove();
 			}
@@ -205,6 +205,7 @@ public class LBRegistrySharedObject extends RegistrySharedObject {
 	/**
 	 * @throws IOException  
 	 */
+	@SuppressWarnings("unchecked")
 	protected Request sendCallRequest(RemoteServiceRegistrationImpl remoteRegistration, final IRemoteCall call) throws IOException {
 		Request request = new Request(this.getLocalContainerID(), remoteRegistration.getServiceId(), RemoteCallImpl.createRemoteCall(null, call.getMethod(), call.getParameters(), call.getTimeout()), null);
 		requests.add(request);
@@ -233,14 +234,14 @@ public class LBRegistrySharedObject extends RegistrySharedObject {
 		return request;
 	}
 
-	public IRemoteServiceRegistration registerRemoteService(String[] clazzes, Object service, Dictionary properties) {
+	public IRemoteServiceRegistration registerRemoteService(String[] clazzes, Object service, @SuppressWarnings("rawtypes") Dictionary properties) {
 		if (properties != null && properties.get(Constants.SERVICE_REGISTER_PROXY) != null) {
 			return registerLBRemoteService(clazzes, service, properties);
 		}
 		return super.registerRemoteService(clazzes, service, properties);
 	}
 
-	private IRemoteServiceRegistration registerLBRemoteService(String[] clazzes, Object service, Dictionary properties) {
+	private IRemoteServiceRegistration registerLBRemoteService(String[] clazzes, Object service, @SuppressWarnings("rawtypes") Dictionary properties) {
 		if (clazzes == null || clazzes.length == 0) {
 			throw new IllegalArgumentException("Service classes length cannot be null or of length 0"); //$NON-NLS-1$
 		}

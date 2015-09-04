@@ -40,15 +40,16 @@ public abstract class AbstractJMSChannel extends SocketAddress implements ISynch
 	private boolean started = false;
 	protected ISynchAsynchEventHandler handler;
 	protected int keepAlive = -1;
+	@SuppressWarnings("rawtypes")
 	private Map properties = new HashMap();
-	protected List connectionListeners = new ArrayList();
+	protected List<IConnectionListener> connectionListeners = new ArrayList<IConnectionListener>();
 	protected boolean isStopping = false;
 	protected Object waitResponse = new Object();
 	protected String correlation = null;
 	protected Serializable reply = null;
 	protected boolean waitDone;
 
-	public AbstractJMSChannel(ISynchAsynchEventHandler hand, int keepAlive, Map properties) {
+	public AbstractJMSChannel(ISynchAsynchEventHandler hand, int keepAlive, @SuppressWarnings("rawtypes") Map properties) {
 		this.handler = hand;
 		Assert.isNotNull(this.handler);
 		this.localContainerID = hand.getEventHandlerID();
@@ -71,25 +72,21 @@ public abstract class AbstractJMSChannel extends SocketAddress implements ISynch
 	protected abstract void handleSynchRequest(String jmsCorrelationID, ECFMessage ecfmsg);
 
 	protected void fireListenersConnect(ConnectionEvent event) {
-		List toNotify = null;
+		List<IConnectionListener> toNotify = null;
 		synchronized (connectionListeners) {
-			toNotify = new ArrayList(connectionListeners);
+			toNotify = new ArrayList<IConnectionListener>(connectionListeners);
 		}
-		for (Iterator i = toNotify.iterator(); i.hasNext();) {
-			IConnectionListener l = (IConnectionListener) i.next();
-			l.handleConnectEvent(event);
-		}
+		for (Iterator<IConnectionListener> i = toNotify.iterator(); i.hasNext();)
+			i.next().handleConnectEvent(event);
 	}
 
 	protected void fireListenersDisconnect(ConnectionEvent event) {
-		List toNotify = null;
+		List<IConnectionListener> toNotify = null;
 		synchronized (connectionListeners) {
-			toNotify = new ArrayList(connectionListeners);
+			toNotify = new ArrayList<IConnectionListener>(connectionListeners);
 		}
-		for (Iterator i = toNotify.iterator(); i.hasNext();) {
-			IConnectionListener l = (IConnectionListener) i.next();
-			l.handleConnectEvent(event);
-		}
+		for (Iterator<IConnectionListener> i = toNotify.iterator(); i.hasNext();)
+			i.next().handleConnectEvent(event);
 	}
 
 	/*
@@ -206,6 +203,7 @@ public abstract class AbstractJMSChannel extends SocketAddress implements ISynch
 	 * 
 	 * @see org.eclipse.ecf.provider.comm.IConnection#getProperties()
 	 */
+	@SuppressWarnings("rawtypes")
 	public Map getProperties() {
 		return properties;
 	}
@@ -233,7 +231,8 @@ public abstract class AbstractJMSChannel extends SocketAddress implements ISynch
 	 * 
 	 * @see org.eclipse.ecf.core.comm.IConnection#getAdapter(java.lang.Class)
 	 */
-	public Object getAdapter(Class clazz) {
+	@SuppressWarnings("unchecked")
+	public Object getAdapter(@SuppressWarnings("rawtypes") Class clazz) {
 		return null;
 	}
 
