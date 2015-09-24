@@ -318,7 +318,9 @@ public abstract class AbstractJMSChannel extends SocketAddress implements ISynch
 		sendMessage(createMessage(object, jmsCorrelationId));
 	}
 
-	protected void updateCorrelation() {
+	protected synchronized void updateCorrelation() {
+		if (correlationID == Long.MAX_VALUE)
+			correlationID = 0;
 		this.correlation = String.valueOf(correlationID++);
 	}
 

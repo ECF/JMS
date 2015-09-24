@@ -35,10 +35,14 @@ public abstract class AbstractJMSContainerInstantiator extends PeerRemoteService
 	}
 
 	protected JMSID getJMSIDFromParams(Map<String, ?> params, String def) {
+		if (params == null)
+			return getJMSIDFromParameter(def, null);
 		return getJMSIDFromParameter(params.get(ID_PARAM), def);
 	}
 
 	protected Integer getKeepAlive(Map<String, ?> params, Integer def) {
+		if (params == null)
+			return def;
 		return getParameterValue(params, KEEPALIVE_PARAM, Integer.class, def);
 	}
 
