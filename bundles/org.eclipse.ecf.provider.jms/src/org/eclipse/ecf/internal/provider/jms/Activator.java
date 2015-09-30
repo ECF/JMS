@@ -9,9 +9,7 @@
 package org.eclipse.ecf.internal.provider.jms;
 
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.ecf.core.identity.Namespace;
-import org.eclipse.ecf.core.util.ExtensionRegistryRunnable;
 import org.eclipse.ecf.core.util.LogHelper;
 import org.eclipse.ecf.provider.jms.identity.JMSNamespace;
 import org.osgi.framework.BundleActivator;
@@ -60,11 +58,7 @@ public class Activator implements BundleActivator {
 	 */
 	public void start(final BundleContext ctxt) throws Exception {
 		this.context = ctxt;
-		SafeRunner.run(new ExtensionRegistryRunnable(this.context) {
-			protected void runWithoutRegistry() throws Exception {
-				ctxt.registerService(Namespace.class, new JMSNamespace(), null);
-			}
-		});
+		ctxt.registerService(Namespace.class, new JMSNamespace(), null);
 	}
 
 	/**
