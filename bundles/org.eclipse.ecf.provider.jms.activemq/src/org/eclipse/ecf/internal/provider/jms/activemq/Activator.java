@@ -1,19 +1,22 @@
 package org.eclipse.ecf.internal.provider.jms.activemq;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IAdapterFactory;
 import org.eclipse.core.runtime.IAdapterManager;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.SafeRunner;
-import org.eclipse.ecf.core.ContainerTypeDescription;
 import org.eclipse.ecf.core.util.AdapterManagerTracker;
-import org.eclipse.ecf.core.util.ExtensionRegistryRunnable;
 import org.eclipse.ecf.core.util.LogHelper;
 import org.eclipse.ecf.provider.datashare.DatashareContainerAdapterFactory;
+import org.eclipse.ecf.provider.jms.activemq.container.ActiveMQJMSClientContainer;
+import org.eclipse.ecf.provider.jms.activemq.container.ActiveMQJMSQueueConsumerContainer;
+import org.eclipse.ecf.provider.jms.activemq.container.ActiveMQJMSQueueProducerContainer;
+import org.eclipse.ecf.provider.jms.activemq.container.ActiveMQJMSServerContainer;
 import org.eclipse.ecf.provider.remoteservice.generic.RemoteServiceContainerAdapterFactory;
+import org.eclipse.ecf.remoteservice.provider.AdapterConfig;
+import org.eclipse.ecf.remoteservice.provider.IRemoteServiceDistributionProvider;
+import org.eclipse.ecf.remoteservice.provider.RemoteServiceDistributionProvider;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.log.LogService;
@@ -77,36 +80,46 @@ public class Activator implements BundleActivator {
 	public void start(final BundleContext context1) throws Exception {
 		plugin = this;
 		this.context = context1;
-		SafeRunner.run(new ExtensionRegistryRunnable(this.context) {
-			protected void runWithoutRegistry() throws Exception {
-				context1.registerService(ContainerTypeDescription.class, new ContainerTypeDescription(ActiveMQJMSClientContainerInstantiator.JMS_CLIENT_NAME, new ActiveMQJMSClientContainerInstantiator(), "ActiveMQ Topic Client", false, false), null); //$NON-NLS-1$
-				context1.registerService(ContainerTypeDescription.class, new ContainerTypeDescription(ActiveMQJMSServerContainerInstantiator.JMS_MANAGER_NAME, new ActiveMQJMSServerContainerInstantiator(), "ActiveMQ Topic Manager", true, false), null); //$NON-NLS-1$
-				context1.registerService(ContainerTypeDescription.class, new ContainerTypeDescription(ActiveMQJMSQueueProducerContainerInstantiator.NAME, new ActiveMQJMSQueueProducerContainerInstantiator(), "ActiveMQ Load Balancing Service Host Container", false, false), null); //$NON-NLS-1$
-				context1.registerService(ContainerTypeDescription.class, new ContainerTypeDescription(ActiveMQJMSQueueConsumerContainerInstantiator.NAME, new ActiveMQJMSQueueConsumerContainerInstantiator(), "ActiveMQ Load Balancing Server Container", true, false), null); //$NON-NLS-1$
-
-				IAdapterManager am = getAdapterManager(context1);
-				if (am != null) {
-					rscAdapterFactories = new ArrayList<IAdapterFactory>();
-					IAdapterFactory af = new RemoteServiceContainerAdapterFactory();
-					am.registerAdapters(af, org.eclipse.ecf.provider.jms.activemq.container.ActiveMQJMSClientContainer.class);
-					rscAdapterFactories.add(af);
-					af = new RemoteServiceContainerAdapterFactory();
-					am.registerAdapters(af, org.eclipse.ecf.provider.jms.activemq.container.ActiveMQJMSServerContainer.class);
-					rscAdapterFactories.add(af);
-					af = new RemoteServiceContainerAdapterFactory();
-					am.registerAdapters(af, org.eclipse.ecf.provider.jms.activemq.container.ActiveMQJMSQueueProducerContainer.class);
-					rscAdapterFactories.add(af);
-					af = new DatashareContainerAdapterFactory();
-					am.registerAdapters(af, org.eclipse.ecf.provider.jms.activemq.container.ActiveMQJMSClientContainer.class);
-					rscAdapterFactories.add(af);
-					af = new DatashareContainerAdapterFactory();
-					am.registerAdapters(af, org.eclipse.ecf.provider.jms.activemq.container.ActiveMQJMSServerContainer.class);
-					rscAdapterFactories.add(af);
-				}
-
-			}
-		});
-
+		this.context.registerService(IRemoteServiceDistributionProvider.class,
+				new RemoteServiceDistributionProvider.Builder()
+						.setName(ActiveMQJMSClientContainerInstantiator.JMS_CLIENT_NAME)
+						.setInstantiator(new ActiveMQJMSClientContainerInstantiator())
+						.setDescription("ActiveMQ Topic Client").setServer(false)
+						.addAdapterConfig(new AdapterConfig(new RemoteServiceContainerAdapterFactory(),
+								ActiveMQJMSClientContainer.class))
+						.addAdapterConfig(new AdapterConfig(new DatashareContainerAdapterFactory(),
+								ActiveMQJMSClientContainer.class))
+						.build(),
+				null);
+		this.context.registerService(IRemoteServiceDistributionProvider.class,
+				new RemoteServiceDistributionProvider.Builder()
+						.setName(ActiveMQJMSServerContainerInstantiator.JMS_MANAGER_NAME)
+						.setInstantiator(new ActiveMQJMSServerContainerInstantiator())
+						.setDescription("ActiveMQ Topic Manager").setServer(true)
+						.addAdapterConfig(new AdapterConfig(new RemoteServiceContainerAdapterFactory(),
+								ActiveMQJMSServerContainer.class))
+						.addAdapterConfig(new AdapterConfig(new DatashareContainerAdapterFactory(),
+								ActiveMQJMSServerContainer.class))
+						.build(),
+				null);
+		this.context.registerService(IRemoteServiceDistributionProvider.class,
+				new RemoteServiceDistributionProvider.Builder()
+						.setName(ActiveMQJMSQueueProducerContainerInstantiator.NAME)
+						.setInstantiator(new ActiveMQJMSQueueProducerContainerInstantiator())
+						.setDescription("ActiveMQ Load Balancing Service Host Container").setServer(false)
+						.addAdapterConfig(new AdapterConfig(new RemoteServiceContainerAdapterFactory(),
+								ActiveMQJMSQueueProducerContainer.class))
+						.build(),
+				null);
+		this.context.registerService(IRemoteServiceDistributionProvider.class,
+				new RemoteServiceDistributionProvider.Builder()
+						.setName(ActiveMQJMSQueueConsumerContainerInstantiator.NAME)
+						.setInstantiator(new ActiveMQJMSQueueConsumerContainerInstantiator())
+						.setDescription("ActiveMQ Load Balancing Server Container").setServer(true)
+						.addAdapterConfig(new AdapterConfig(new RemoteServiceContainerAdapterFactory(),
+								ActiveMQJMSQueueConsumerContainer.class))
+						.build(),
+				null);
 	}
 
 	/*
