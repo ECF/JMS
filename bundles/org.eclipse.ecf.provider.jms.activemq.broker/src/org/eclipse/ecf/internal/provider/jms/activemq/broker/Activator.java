@@ -1,5 +1,6 @@
 package org.eclipse.ecf.internal.provider.jms.activemq.broker;
 
+import org.eclipse.ecf.provider.jms.activemq.broker.ActiveMQJMSBrokerContainer;
 import org.eclipse.ecf.remoteservice.provider.IRemoteServiceDistributionProvider;
 import org.eclipse.ecf.remoteservice.provider.RemoteServiceDistributionProvider;
 import org.osgi.framework.BundleActivator;
@@ -20,7 +21,7 @@ public class Activator implements BundleActivator {
 	public void start(BundleContext bundleContext) throws Exception {
 		Activator.context = bundleContext;
 		context.registerService(IRemoteServiceDistributionProvider.class,
-				new RemoteServiceDistributionProvider.Builder().setName("ecf.jms.activemq.broker")
+				new RemoteServiceDistributionProvider.Builder().setName(ActiveMQJMSBrokerContainer.NAME)
 						.setInstantiator(new ActiveMQJMSBrokerContainerInstantiator()).build(),
 				null);
 	}

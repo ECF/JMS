@@ -25,6 +25,8 @@ import org.eclipse.ecf.provider.jms.identity.JMSNamespace;
 
 public class ActiveMQJMSBrokerContainer extends AbstractContainer {
 
+	public static final String NAME = "ecf.jms.activemq.broker";
+	
 	private JMSID id;
 	protected BrokerService brokerService;
 	
