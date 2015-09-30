@@ -8,20 +8,21 @@
  ******************************************************************************/
 package org.eclipse.ecf.provider.jms.container;
 
+import java.util.List;
 import java.util.Map;
 import org.eclipse.ecf.core.identity.IDFactory;
 import org.eclipse.ecf.provider.jms.identity.JMSID;
 import org.eclipse.ecf.provider.jms.identity.JMSNamespace;
-import org.eclipse.ecf.remoteservice.provider.PeerRemoteServiceContainerInstantiator;
+import org.eclipse.ecf.remoteservice.provider.RemoteServiceContainerInstantiator;
 
-public abstract class AbstractJMSContainerInstantiator extends PeerRemoteServiceContainerInstantiator {
-
-	public AbstractJMSContainerInstantiator(String peerA, String peerB) {
-		super(peerA, peerB);
-	}
+public abstract class AbstractJMSContainerInstantiator extends RemoteServiceContainerInstantiator {
 
 	public static final String ID_PARAM = "id"; //$NON-NLS-1$
 	public static final String KEEPALIVE_PARAM = "keepAlive"; //$NON-NLS-1$
+
+	public AbstractJMSContainerInstantiator(List<String> exporterConfigs, Map<String, List<String>> exporterConfigToImporterConfig) {
+		super(exporterConfigs, exporterConfigToImporterConfig);
+	}
 
 	protected JMSID getJMSIDFromParameter(Object p, String def) {
 		if (p == null && def == null)
