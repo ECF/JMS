@@ -1,3 +1,11 @@
+/*******************************************************************************
+ * Copyright (c) 2015 Composent, Inc. and others. All rights reserved. This
+ * program and the accompanying materials are made available under the terms of
+ * the Eclipse Public License v1.0 which accompanies this distribution, and is
+ * available at http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * Contributors: Composent, Inc. - initial API and implementation
+ ******************************************************************************/
 package org.eclipse.ecf.internal.provider.jms.activemq;
 
 import java.util.Iterator;
@@ -8,11 +16,10 @@ import org.eclipse.core.runtime.IAdapterManager;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.ecf.core.util.AdapterManagerTracker;
 import org.eclipse.ecf.core.util.LogHelper;
-import org.eclipse.ecf.provider.datashare.DatashareContainerAdapterFactory;
-import org.eclipse.ecf.provider.jms.activemq.container.ActiveMQJMSClientContainer;
-import org.eclipse.ecf.provider.jms.activemq.container.ActiveMQJMSQueueConsumerContainer;
-import org.eclipse.ecf.provider.jms.activemq.container.ActiveMQJMSQueueProducerContainer;
-import org.eclipse.ecf.provider.jms.activemq.container.ActiveMQJMSServerContainer;
+import org.eclipse.ecf.provider.jms.activemq.container.ActiveMQClientContainer;
+import org.eclipse.ecf.provider.jms.activemq.container.ActiveMQLBQueueProducerContainer;
+import org.eclipse.ecf.provider.jms.activemq.container.ActiveMQQueueConsumerContainer;
+import org.eclipse.ecf.provider.jms.activemq.container.ActiveMQServerContainer;
 import org.eclipse.ecf.provider.remoteservice.generic.RemoteServiceContainerAdapterFactory;
 import org.eclipse.ecf.remoteservice.provider.AdapterConfig;
 import org.eclipse.ecf.remoteservice.provider.IRemoteServiceDistributionProvider;
@@ -45,8 +52,7 @@ public class Activator implements BundleActivator {
 
 	protected LogService getLogService() {
 		if (logServiceTracker == null) {
-			logServiceTracker = new ServiceTracker<LogService, LogService>(
-					this.context, LogService.class, null);
+			logServiceTracker = new ServiceTracker<LogService, LogService>(this.context, LogService.class, null);
 			logServiceTracker.open();
 		}
 		return (LogService) logServiceTracker.getService();
@@ -55,8 +61,7 @@ public class Activator implements BundleActivator {
 	public void log(IStatus status) {
 		LogService logService = getLogService();
 		if (logService != null) {
-			logService.log(LogHelper.getLogCode(status),
-					LogHelper.getLogMessage(status), status.getException());
+			logService.log(LogHelper.getLogCode(status), LogHelper.getLogMessage(status), status.getException());
 		}
 	}
 
@@ -70,7 +75,6 @@ public class Activator implements BundleActivator {
 
 	private List<IAdapterFactory> rscAdapterFactories;
 
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -81,43 +85,35 @@ public class Activator implements BundleActivator {
 		plugin = this;
 		this.context = context1;
 		this.context.registerService(IRemoteServiceDistributionProvider.class,
-				new RemoteServiceDistributionProvider.Builder()
-						.setName(ActiveMQJMSClientContainerInstantiator.JMS_CLIENT_NAME)
-						.setInstantiator(new ActiveMQJMSClientContainerInstantiator())
+				new RemoteServiceDistributionProvider.Builder().setName(ActiveMQClientContainer.CONFIG_NAME)
+						.setInstantiator(new ActiveMQClientContainer.Instantiator())
 						.setDescription("ActiveMQ Topic Client").setServer(false)
 						.addAdapterConfig(new AdapterConfig(new RemoteServiceContainerAdapterFactory(),
-								ActiveMQJMSClientContainer.class))
-						.addAdapterConfig(new AdapterConfig(new DatashareContainerAdapterFactory(),
-								ActiveMQJMSClientContainer.class))
+								ActiveMQClientContainer.class))
 						.build(),
 				null);
 		this.context.registerService(IRemoteServiceDistributionProvider.class,
-				new RemoteServiceDistributionProvider.Builder()
-						.setName(ActiveMQJMSServerContainerInstantiator.JMS_MANAGER_NAME)
-						.setInstantiator(new ActiveMQJMSServerContainerInstantiator())
+				new RemoteServiceDistributionProvider.Builder().setName(ActiveMQServerContainer.CONFIG_NAME)
+						.setInstantiator(new ActiveMQServerContainer.Instantiator())
 						.setDescription("ActiveMQ Topic Manager").setServer(true)
 						.addAdapterConfig(new AdapterConfig(new RemoteServiceContainerAdapterFactory(),
-								ActiveMQJMSServerContainer.class))
-						.addAdapterConfig(new AdapterConfig(new DatashareContainerAdapterFactory(),
-								ActiveMQJMSServerContainer.class))
+								ActiveMQServerContainer.class))
 						.build(),
 				null);
 		this.context.registerService(IRemoteServiceDistributionProvider.class,
-				new RemoteServiceDistributionProvider.Builder()
-						.setName(ActiveMQJMSQueueProducerContainerInstantiator.NAME)
-						.setInstantiator(new ActiveMQJMSQueueProducerContainerInstantiator())
+				new RemoteServiceDistributionProvider.Builder().setName(ActiveMQLBQueueProducerContainer.CONFIG_NAME)
+						.setInstantiator(new ActiveMQLBQueueProducerContainer.Instantiator())
 						.setDescription("ActiveMQ Load Balancing Service Host Container").setServer(false)
 						.addAdapterConfig(new AdapterConfig(new RemoteServiceContainerAdapterFactory(),
-								ActiveMQJMSQueueProducerContainer.class))
+								ActiveMQLBQueueProducerContainer.class))
 						.build(),
 				null);
 		this.context.registerService(IRemoteServiceDistributionProvider.class,
-				new RemoteServiceDistributionProvider.Builder()
-						.setName(ActiveMQJMSQueueConsumerContainerInstantiator.NAME)
-						.setInstantiator(new ActiveMQJMSQueueConsumerContainerInstantiator())
+				new RemoteServiceDistributionProvider.Builder().setName(ActiveMQQueueConsumerContainer.CONFIG_NAME)
+						.setInstantiator(new ActiveMQQueueConsumerContainer.Instantiator())
 						.setDescription("ActiveMQ Load Balancing Server Container").setServer(true)
 						.addAdapterConfig(new AdapterConfig(new RemoteServiceContainerAdapterFactory(),
-								ActiveMQJMSQueueConsumerContainer.class))
+								ActiveMQQueueConsumerContainer.class))
 						.build(),
 				null);
 	}

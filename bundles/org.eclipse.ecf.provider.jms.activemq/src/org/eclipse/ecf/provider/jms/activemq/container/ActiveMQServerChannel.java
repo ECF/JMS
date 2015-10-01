@@ -1,6 +1,11 @@
-/**
+/*******************************************************************************
+ * Copyright (c) 2015 Composent, Inc. and others. All rights reserved. This
+ * program and the accompanying materials are made available under the terms of
+ * the Eclipse Public License v1.0 which accompanies this distribution, and is
+ * available at http://www.eclipse.org/legal/epl-v10.html
  * 
- */
+ * Contributors: Composent, Inc. - initial API and implementation
+ ******************************************************************************/
 package org.eclipse.ecf.provider.jms.activemq.container;
 
 import java.io.ByteArrayInputStream;
@@ -22,25 +27,21 @@ public class ActiveMQServerChannel extends AbstractJMSServerChannel {
 	private final String username;
 	private final String password;
 
-	public ActiveMQServerChannel(ISynchAsynchEventHandler handler,
-			int keepAlive, String username, String pw) throws ECFException {
+	public ActiveMQServerChannel(ISynchAsynchEventHandler handler, int keepAlive, String username, String pw)
+			throws ECFException {
 		super(handler, keepAlive);
 		this.username = username;
 		this.password = pw;
 		setupJMS((JMSID) localContainerID, null);
 	}
 
-	protected Object readObject(byte[] bytes) throws IOException,
-			ClassNotFoundException {
-		ObjectInputStream oos = new ObjectInputStream(new ByteArrayInputStream(
-				bytes));
+	protected Object readObject(byte[] bytes) throws IOException, ClassNotFoundException {
+		ObjectInputStream oos = new ObjectInputStream(new ByteArrayInputStream(bytes));
 		return oos.readObject();
 	}
 
-	protected ConnectionFactory createJMSConnectionFactory(JMSID targetID)
-			throws IOException {
-		return new ActiveMQConnectionFactory(username, password,
-				targetID.getName());
+	protected ConnectionFactory createJMSConnectionFactory(JMSID targetID) throws IOException {
+		return new ActiveMQConnectionFactory(username, password, targetID.getName());
 	}
 
 }

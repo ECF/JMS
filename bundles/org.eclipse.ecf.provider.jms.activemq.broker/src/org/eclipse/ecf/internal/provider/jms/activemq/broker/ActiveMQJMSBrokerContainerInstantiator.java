@@ -24,25 +24,21 @@ import org.eclipse.ecf.provider.jms.activemq.broker.ActiveMQJMSBrokerContainer;
 import org.eclipse.ecf.provider.jms.identity.JMSID;
 import org.eclipse.ecf.provider.jms.identity.JMSNamespace;
 
-public class ActiveMQJMSBrokerContainerInstantiator extends
-		BaseContainerInstantiator {
+public class ActiveMQJMSBrokerContainerInstantiator extends BaseContainerInstantiator {
 
-	public IContainer createInstance(ContainerTypeDescription description,
-			Object[] parameters) throws ContainerCreateException {
+	public IContainer createInstance(ContainerTypeDescription description, Object[] parameters)
+			throws ContainerCreateException {
 		try {
 			BrokerService broker = createBrokerService(parameters);
 			IIDFactory idFactory = IDFactory.getDefault();
-			JMSID jmsid = (JMSID) idFactory.createID(JMSNamespace.NAME,
-					idFactory.createGUID().getName());
+			JMSID jmsid = (JMSID) idFactory.createID(JMSNamespace.NAME, idFactory.createGUID().getName());
 			return new ActiveMQJMSBrokerContainer(jmsid, broker);
 		} catch (Exception e) {
-			throw new ContainerCreateException(
-					"Could not create broker container", e);
+			throw new ContainerCreateException("Could not create broker container", e);
 		}
 	}
 
-	private BrokerService createBrokerService(Object[] parameters)
-			throws Exception {
+	private BrokerService createBrokerService(Object[] parameters) throws Exception {
 		if (parameters == null || parameters.length < 1) {
 			BrokerService result = new BrokerService();
 			result.addConnector("tcp://localhost:61616");

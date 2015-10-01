@@ -8,8 +8,7 @@
  ******************************************************************************/
 package org.eclipse.ecf.provider.jms.container;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import org.eclipse.ecf.core.identity.IDFactory;
 import org.eclipse.ecf.provider.jms.identity.JMSID;
 import org.eclipse.ecf.provider.jms.identity.JMSNamespace;
@@ -20,8 +19,27 @@ public abstract class AbstractJMSContainerInstantiator extends RemoteServiceCont
 	public static final String ID_PARAM = "id"; //$NON-NLS-1$
 	public static final String KEEPALIVE_PARAM = "keepAlive"; //$NON-NLS-1$
 
+	protected static Map<String, List<String>> createMap(String exporter, List<String> importers) {
+		final Map<String, List<String>> map = new HashMap<String, List<String>>();
+		if (importers != null)
+			map.put(exporter, importers);
+		return map;
+	}
+
+	public AbstractJMSContainerInstantiator(String exporter, String importer) {
+		super(Arrays.asList(new String[] {exporter}), createMap(exporter, Arrays.asList(new String[] {importer})));
+	}
+
+	public AbstractJMSContainerInstantiator(String exporter, List<String> importers) {
+		super(Arrays.asList(new String[] {exporter}), createMap(exporter, importers));
+	}
+
 	public AbstractJMSContainerInstantiator(List<String> exporterConfigs, Map<String, List<String>> exporterConfigToImporterConfig) {
 		super(exporterConfigs, exporterConfigToImporterConfig);
+	}
+
+	protected JMSID getJMSIDFromParameter(Object p) {
+		return getJMSIDFromParameter(p, null);
 	}
 
 	protected JMSID getJMSIDFromParameter(Object p, String def) {
