@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %plugin.name
 Bundle-SymbolicName: org.eclipse.ecf.provider.jms
-Bundle-Version: 1.9.0.qualifier
+Bundle-Version: 1.9.1.qualifier
 Bundle-ClassPath: .
 Bundle-Activator: org.eclipse.ecf.internal.provider.jms.Activator
 Bundle-Vendor: %plugin.provider

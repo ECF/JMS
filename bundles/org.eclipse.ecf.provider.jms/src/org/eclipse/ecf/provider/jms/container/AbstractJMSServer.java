@@ -17,7 +17,7 @@ import java.net.SocketAddress;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.ecf.core.events.ContainerConnectedEvent;
-import org.eclipse.ecf.core.identity.ID;
+import org.eclipse.ecf.core.identity.*;
 import org.eclipse.ecf.core.security.IConnectHandlerPolicy;
 import org.eclipse.ecf.core.util.ECFException;
 import org.eclipse.ecf.core.util.Trace;
@@ -27,6 +27,7 @@ import org.eclipse.ecf.provider.comm.*;
 import org.eclipse.ecf.provider.generic.ContainerMessage;
 import org.eclipse.ecf.provider.generic.ServerSOContainer;
 import org.eclipse.ecf.provider.jms.channel.*;
+import org.eclipse.ecf.provider.jms.identity.JMSNamespace;
 
 /**
  * Abstract JMS Server. Subclasses should be created to create concrete
@@ -39,6 +40,10 @@ public abstract class AbstractJMSServer extends ServerSOContainer {
 	private IConnectHandlerPolicy joinPolicy = null;
 
 	private ISynchAsynchConnection serverChannel;
+
+	public Namespace getConnectNamespace() {
+		return IDFactory.getDefault().getNamespaceByName(JMSNamespace.NAME);
+	}
 
 	public AbstractJMSServer(JMSContainerConfig config) {
 		super(config);
