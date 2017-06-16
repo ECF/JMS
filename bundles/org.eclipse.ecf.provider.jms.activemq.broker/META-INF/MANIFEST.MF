@@ -2,10 +2,10 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: ECF ActiveMQ Provider Broker
 Bundle-SymbolicName: org.eclipse.ecf.provider.jms.activemq.broker
-Bundle-Version: 5.12.0.qualifier
+Bundle-Version: 5.14.5.qualifier
 Bundle-Activator: org.eclipse.ecf.internal.provider.jms.activemq.broker.Activator
 Bundle-Vendor: Eclipse.org - ECF
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: javax.jms;version="1.1.0",
  org.eclipse.ecf.core;version="3.0.0",
  org.eclipse.ecf.core.events,
@@ -21,7 +21,7 @@ Require-Bundle: org.eclipse.equinox.common,
  org.eclipse.ecf.provider.jms.activemq;bundle-version="5.8.0"
 Bundle-Localization: plugin
 Bundle-ClassPath: .,
- lib/activemq5.12.0/activemq-all-5.12.0.jar,
- lib/activemq5.12.0/geronimo-j2ee-management_1.1_spec-1.0.1.jar,
- lib/activemq5.12.0/slf4j-api-1.7.10.jar
+ lib/activemq5.14.5/activemq-all-5.14.5.jar,
+ lib/activemq5.14.5/geronimo-j2ee-management_1.1_spec-1.0.1.jar,
+ lib/activemq5.14.5/slf4j-api-1.7.13.jar
 Provide-Capability: osgi.remoteserviceadmin.distribution; configs:List<String>="ecf.jms.activemq.broker"; version:Version=1.1
