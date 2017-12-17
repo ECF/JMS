@@ -2,8 +2,8 @@
 <feature
       id="org.eclipse.ecf.provider.jms.feature"
       label="Eclipse Communication Framework JMS Provider"
-      version="2.5.0.qualifier"
-      provider-name="Eclipse.org">
+      version="2.6.0.qualifier"
+      provider-name="Eclipse.org - ECF">
 
    <description>
       Eclipse Communication Framework Java Messaging Service Provider
