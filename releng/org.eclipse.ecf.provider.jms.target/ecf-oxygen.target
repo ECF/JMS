@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?pde version="3.8"?><target name="JMS Provider Oxygen Target" sequenceNumber="39">
+<locations>
+<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+<unit id="org.eclipse.emf.edit.ui.feature.group" version="2.13.0.v20170609-0928"/>
+<unit id="org.eclipse.emf.edit.ui.source.feature.group" version="2.13.0.v20170609-0928"/>
+<unit id="org.eclipse.pde.feature.group" version="3.13.2.v20171130-0510"/>
+<unit id="org.eclipse.pde.source.feature.group" version="3.13.2.v20171130-0510"/>
+<unit id="org.eclipse.platform.feature.group" version="4.7.2.v20171130-0510"/>
+<unit id="org.eclipse.platform.source.feature.group" version="4.7.2.v20171130-0510"/>
+<repository location="http://download.eclipse.org/releases/oxygen"/>
+</location>
+<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+<unit id="org.eclipse.license.feature.group" version="1.0.1.v20140414-1359"/>
+<repository location="http://download.eclipse.org/cbi/updates/license/1.0.1.v20140414-1359"/>
+</location>
+<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+<unit id="com.sun.syndication" version="0.9.0.v200803061811"/>
+<unit id="javax.servlet" version="3.1.0.v201410161800"/>
+<unit id="org.apache.commons.codec" version="1.9.0.v20170208-1614"/>
+<unit id="org.apache.commons.logging" version="1.1.1.v201101211721"/>
+<unit id="org.apache.hadoop.zookeeper" version="3.3.3.v201105210832"/>
+<unit id="org.apache.httpcomponents.httpclient" version="4.5.2.v20170210-0925"/>
+<unit id="org.apache.httpcomponents.httpcore" version="4.4.6.v20170210-0925"/>
+<unit id="org.apache.log4j" version="1.2.15.v201012070815"/>
+<unit id="org.eclipse.ecf.core.feature.feature.group" version="1.4.0.v20170516-2248"/>
+<unit id="org.eclipse.ecf.core.feature.group" version="3.13.8.v20170715-2257"/>
+<unit id="org.eclipse.ecf.core.feature.source.feature.group" version="1.4.0.v20170516-2248"/>
+<unit id="org.eclipse.ecf.core.source.feature.group" version="3.13.8.v20170715-2257"/>
+<unit id="org.eclipse.ecf.core.ssl.feature.feature.group" version="1.1.0.v20170110-1317"/>
+<unit id="org.eclipse.ecf.core.ssl.feature.source.feature.group" version="1.1.0.v20170110-1317"/>
+<unit id="org.eclipse.ecf.filetransfer.feature.feature.group" version="3.13.8.v20170715-2257"/>
+<unit id="org.eclipse.ecf.filetransfer.feature.source.feature.group" version="3.13.8.v20170715-2257"/>
+<unit id="org.eclipse.ecf.filetransfer.httpclient4.feature.feature.group" version="3.13.8.v20170715-2257"/>
+<unit id="org.eclipse.ecf.filetransfer.httpclient4.feature.source.feature.group" version="3.13.8.v20170715-2257"/>
+<unit id="org.eclipse.ecf.filetransfer.httpclient4.ssl.feature.feature.group" version="1.1.0.v20170110-1317"/>
+<unit id="org.eclipse.ecf.filetransfer.httpclient4.ssl.feature.source.feature.group" version="1.1.0.v20170110-1317"/>
+<unit id="org.eclipse.ecf.filetransfer.ssl.feature.feature.group" version="1.1.0.v20170110-1317"/>
+<unit id="org.eclipse.ecf.filetransfer.ssl.feature.source.feature.group" version="1.1.0.v20170110-1317"/>
+<unit id="org.eclipse.ecf.remoteservice.sdk.examples.feature.feature.group" version="1.0.0.v20170816-0237"/>
+<unit id="org.eclipse.ecf.remoteservice.sdk.examples.feature.source.feature.group" version="1.0.0.v20170816-0237"/>
+<unit id="org.eclipse.ecf.remoteservice.sdk.feature.feature.group" version="3.13.8.v20170816-0246"/>
+<unit id="org.eclipse.ecf.remoteservice.sdk.feature.source.feature.group" version="3.13.8.v20170816-0246"/>
+<unit id="org.jdom" version="1.1.1.v201101151400"/>
+<unit id="org.json" version="1.0.0.v201011060100"/>
+<unit id="org.objectweb.asm" version="5.0.1.v201404251740"/>
+<unit id="org.xbill.dns" version="2.0.8.v201112050911"/>
+<repository location="http://download.eclipse.org/rt/ecf/3.13.8/site.p2"/>
+</location>
+<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+<unit id="javax.jms" version="1.1.0.v201205091237"/>
+<unit id="javax.jms.source" version="1.1.0.v201205091237"/>
+<repository location="http://download.eclipse.org/tools/orbit/R-builds/R20170516192513/repository"/>
+</location>
+</locations>
+</target>
