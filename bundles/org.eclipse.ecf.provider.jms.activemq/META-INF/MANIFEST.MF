@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: %plugin.name
 Bundle-SymbolicName: org.eclipse.ecf.provider.jms.activemq
 Automatic-Module-Name: org.eclipse.ecf.provider.jms.activemq
-Bundle-Version: 5.14.100.qualifier
+Bundle-Version: 5.15.0.qualifier
 Bundle-Activator: org.eclipse.ecf.internal.provider.jms.activemq.Activator
 Bundle-Vendor: %plugin.provider
 Bundle-Localization: plugin

@@ -8,6 +8,8 @@
  ******************************************************************************/
 package org.eclipse.ecf.provider.jms.activemq.container;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -69,6 +71,15 @@ public class ActiveMQServerContainer extends AbstractJMSServer {
 		public IContainer createInstance(ContainerTypeDescription description, Map<String, ?> parameters)
 				throws ContainerCreateException {
 			JMSID id = getJMSIDFromParams(parameters, ActiveMQServerContainer.DEFAULT_SERVER_ID);
+			URI uri = null;
+			try {
+				uri = new URI(id.getName());
+			} catch (URISyntaxException e) {
+				throw new ContainerCreateException("Could not create container since idname="+id.getName()+" is not uri format");
+			}
+			
+			checkOSGIIntents(description, uri, parameters);
+			
 			Integer ka = getKeepAlive(parameters, ActiveMQServerContainer.DEFAULT_KEEPALIVE);
 			Map<String, String> props = new HashMap<String, String>();
 			props.put(ActiveMQServerContainer.USERNAME_PROPERTY,
@@ -84,6 +95,15 @@ public class ActiveMQServerContainer extends AbstractJMSServer {
 			return server;
 		}
 
+		@Override
+		protected boolean supportsOSGIAsyncIntent(ContainerTypeDescription description) {
+			return true;
+		}
+		
+		protected boolean supportsOSGIPrivateIntent(ContainerTypeDescription description) {
+			return true;
+		}
+		
 	}
 
 	public ActiveMQServerContainer(JMSContainerConfig config) {
