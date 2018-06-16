@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: %plugin.name
 Bundle-SymbolicName: org.eclipse.ecf.provider.jms.activemq
 Automatic-Module-Name: org.eclipse.ecf.provider.jms.activemq
-Bundle-Version: 5.15.0.qualifier
+Bundle-Version: 5.15.4.qualifier
 Bundle-Activator: org.eclipse.ecf.internal.provider.jms.activemq.Activator
 Bundle-Vendor: %plugin.provider
 Bundle-Localization: plugin
@@ -12,10 +12,10 @@ Require-Bundle: org.eclipse.equinox.common;bundle-version="[3.0.0,4.0.0)",
 Eclipse-LazyStart: true
 Eclipse-BuddyPolicy: global
 Bundle-ClassPath: .,
- lib/activemq5.14.5/activemq-client-5.14.5.jar,
- lib/activemq5.14.5/geronimo-j2ee-management_1.1_spec-1.0.1.jar,
- lib/activemq5.14.5/slf4j-api-1.7.13.jar,
- lib/activemq5.14.5/hawtbuf-1.11.jar
+ lib/activemq5.15.4/activemq-client-5.15.4.jar,
+ lib/activemq5.15.4/geronimo-j2ee-management_1.1_spec-1.0.1.jar,
+ lib/activemq5.15.4/hawtbuf-1.11.jar,
+ lib/activemq5.15.4/slf4j-api-1.7.25.jar
 Import-Package: javax.jms;version="1.1.0",
  org.eclipse.ecf.core;version="[3.0.0,4.0.0)",
  org.eclipse.ecf.core.events;version="[3.0.0,4.0.0)",

@@ -9,6 +9,6 @@
     <relativePath>../../</relativePath>
   </parent>
   <artifactId>org.eclipse.ecf.provider.jms.activemq.broker</artifactId>
-  <version>5.14.100-SNAPSHOT</version>
+  <version>5.15.0-SNAPSHOT</version>
   <packaging>eclipse-plugin</packaging>
 </project>

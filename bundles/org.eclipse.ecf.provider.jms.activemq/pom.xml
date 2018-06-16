@@ -9,6 +9,6 @@
     <relativePath>../../</relativePath>
   </parent>
   <artifactId>org.eclipse.ecf.provider.jms.activemq</artifactId>
-  <version>5.15.0-SNAPSHOT</version>
+  <version>5.15.4-SNAPSHOT</version>
   <packaging>eclipse-plugin</packaging>
 </project>
