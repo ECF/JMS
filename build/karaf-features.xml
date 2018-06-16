@@ -1,0 +1,20 @@
+<features xmlns="http://karaf.apache.org/xmlns/features/v1.2.0"	name="ecf-remoteservices-jms-2.9.0">
+	
+    <feature name="ecf-rs-distribution-jms-core" version="2.9.0" description="ECF JMS Distribution Provider Support. See https://github.com/ECF/JMS">
+            <feature>ecf-rs-rsa</feature>
+            <feature>ecf-rs-console</feature>
+            <bundle>https://raw.githubusercontent.com/ECF/JMS/master/build/plugins/javax.jms_1.1.0.v201205091237.jar</bundle>
+            <bundle>https://raw.githubusercontent.com/ECF/JMS/master/build/plugins/org.eclipse.ecf.provider.jms_1.10.100.201806152009.jar</bundle>
+    </feature>
+	
+    <feature name="ecf-rs-distribution-jms-activemq" version="2.9.0" description="ECF ActiveMQ Distribution Provider.  See https://github.com/ECF/JMS">
+        <feature>ecf-rs-distribution-jms-core</feature>
+	    <bundle>https://raw.githubusercontent.com/ECF/JMS/master/build/plugins/org.eclipse.ecf.provider.jms.activemq_5.15.4.201806152009.jar</bundle>
+    </feature>
+
+    <feature name="ecf-rs-distribution-jms-activemq-broker" version="2.9.0" description="ECF ActiveMQ Broker.  See https://github.com/ECF/JMS">
+        <feature>ecf-rs-distribution-jms-core</feature>
+	    <bundle>https://raw.githubusercontent.com/ECF/JMS/master/build/plugins/org.eclipse.ecf.provider.jms.activemq.broker_5.15.4.201806152009.jar</bundle>
+    </feature>
+    
+</features>	
